@@ -492,7 +492,7 @@ function nextReview(){
   const gm={empresa:'r_empresa',planta:'r_planta',subplanta:'r_subplanta',maquina:'r_maquina',equipo:'r_equipo',subequipo:'r_subequipo',tecnico:'r_tecnico',fecha_levantamiento:'r_fecha_lev'};
   Object.entries(gm).forEach(([k,id])=>{const el=document.getElementById(id);if(el){el.value=gen[k]||'';el.classList.toggle('sc',!!(gen[k]));}});
   (data.mangueras||[]).forEach((m,idx)=>{const n=idx+1;['ubicacion','presion','longitud','recubrimiento','conA','adaptA','conB','adaptB','comentarios'].forEach(f=>{const el=document.getElementById(`r${n}_${f}`);if(el){el.value=m[f]||'';el.classList.toggle('sc',!!(m[f]));} });fSel(`r${n}_diametro`,m.diametro);fSel(`r${n}_sae`,m.sae);});
-  swTab(1);document.getElementById('revOv').style.display='flex';
+  swTab(null,1);document.getElementById('revOv').style.display='flex';
 }
 
 function saveRev(){
