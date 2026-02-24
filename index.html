@@ -62,7 +62,9 @@ header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;heig
 .bcanc{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:5px;padding:9px 12px;font-size:11px;cursor:pointer;}
 .bcanc:hover{border-color:var(--rd);color:var(--rd);}
 /* REVIEW */
-.rmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--gn);border-radius:9px;padding:18px;max-width:640px;width:100%;}
+.rmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--gn);border-radius:9px;max-width:640px;width:100%;display:flex;flex-direction:column;max-height:88vh;}
+.rmo-body{flex:1;overflow-y:auto;padding:18px 18px 0;-webkit-overflow-scrolling:touch;}
+.rmo-footer{padding:12px 18px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--dk);border-top:1px solid var(--br2);}
 .rmt{font-family:var(--fc);font-size:12px;font-weight:800;color:var(--gn);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
 .rmc{font-size:10px;color:var(--mu);margin-bottom:8px;}
 .rlay{display:grid;grid-template-columns:120px 1fr;gap:12px;margin-bottom:10px;}
@@ -183,7 +185,9 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
   .bgen{margin-top:10px;padding:13px;}
   /* Modales full screen */
   .mo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;margin:0;}
-  .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;overflow-y:auto;}
+  .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;}
+  .rmo-body{padding:14px 14px 0;}
+  .rmo-footer{padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,12px));}
   /* Barra fija inferior */
   #mobileBar{display:flex;}
 }
@@ -234,6 +238,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 <!-- REVIEW MODAL -->
 <div class="ov" id="revOv" style="display:none">
   <div class="rmo">
+    <div class="rmo-body">
     <div class="rmt">✓ Revisar datos extraídos</div>
     <div class="rmc" id="rmc"></div>
     <div class="rlay">
@@ -269,10 +274,13 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
       <div id="mp2" class="mp"></div>
       <div id="mp3" class="mp"></div>
     </div>
+    </div><!-- /rmo-body -->
+    <div class="rmo-footer">
     <div class="rbtns">
       <button class="bsave" onclick="saveRev()">✓ Guardar registros</button>
       <button class="bskip" onclick="skipRev()">Omitir esta hoja</button>
     </div>
+    </div><!-- /rmo-footer -->
   </div>
 </div>
 
