@@ -467,15 +467,20 @@ async function runBatch(){
       const data=await resp.json();
       if(!resp.ok||data.error)throw new Error(data.error?.message||`HTTP ${resp.status}`);
       const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-      results.push({data:JSON.parse(raw),url:files[i].url});
+      toast('RAW: '+raw.substring(0,80),'warn');
+      let parsed;
+      try{ parsed=JSON.parse(raw); }
+      catch(pe){ toast('JSON ERROR: '+pe.message+' | '+raw.substring(0,60),'err'); results.push(null); files[i].status='error'; renderQ(); continue; }
+      results.push({data:parsed,url:files[i].url});
       files[i].status='done';
     }catch(e){
       files[i].status='error';files[i].err=e.message.substring(0,40);
-      results.push(null);toast('Error: '+e.message.substring(0,70),'err');
+      results.push(null);toast('FETCH ERROR: '+e.message.substring(0,70),'err');
     }
     renderQ();
   }
-  await new Promise(r=>setTimeout(r,400));
+  toast('results validos: '+results.filter(Boolean).length+' de '+results.length,'warn');
+  await new Promise(r=>setTimeout(r,2000));
   closeScan();rIdx=0;nextReview();
 }
 
