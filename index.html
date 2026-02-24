@@ -82,7 +82,7 @@ header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;heig
 .rf input:focus,.rf select:focus{border-color:var(--y);}
 .rf input.sc,.rf select.sc{border-color:var(--y);background:rgba(245,197,24,0.07);}
 .tabs{display:flex;gap:4px;margin-bottom:8px;}
-.tab{flex:1;padding:5px;background:var(--dk2);border:1px solid var(--br2);border-radius:3px;font-family:var(--fc);font-size:10.5px;font-weight:700;color:var(--mu);cursor:pointer;text-align:center;transition:all 0.15s;}
+.tab{flex:1;padding:5px;background:var(--dk2);border:1px solid var(--br2);border-radius:3px;font-family:var(--fc);font-size:10.5px;font-weight:700;color:var(--mu);cursor:pointer;text-align:center;transition:all 0.15s;-webkit-appearance:none;appearance:none;outline:none;}
 .tab.active{background:var(--yd);border-color:var(--y);color:var(--y);}
 .mp{display:none;}
 .mp.active{display:block;}
@@ -269,9 +269,9 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="rs">
       <div class="rst">Mangueras</div>
       <div class="tabs">
-        <div class="tab active" onclick="swTab(event,1)">Manguera 1</div>
-        <div class="tab" onclick="swTab(event,2)">Manguera 2</div>
-        <div class="tab" onclick="swTab(event,3)">Manguera 3</div>
+        <button type="button" class="tab active" onclick="swTab(event,1)">Manguera 1</button>
+        <button type="button" class="tab" onclick="swTab(event,2)">Manguera 2</button>
+        <button type="button" class="tab" onclick="swTab(event,3)">Manguera 3</button>
       </div>
       <div id="mp1" class="mp active"></div>
       <div id="mp2" class="mp"></div>
