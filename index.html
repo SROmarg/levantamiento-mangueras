@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bk:#0a0a0a;--dk:#111;--dk2:#1a1a1a;--dk3:#222;--br:#2e2e2e;--br2:#3a3a3a;--y:#f5c518;--y2:#ffd740;--yd:rgba(245,197,24,0.12);--yd2:rgba(245,197,24,0.05);--w:#fff;--tx:#e8e8e8;--mu:#888;--mu2:#555;--gn:#22c55e;--rd:#ef4444;--fn:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bk);color:var(--tx);font-family:var(--fn);min-height:100vh;font-size:13px;}
+body{background:var(--bk);color:var(--tx);font-family:var(--fn);min-height:100vh;font-size:13px;overscroll-behavior-y:none;}
 /* HEADER */
 header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;height:50px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:300;}
 .lb{background:var(--y);color:var(--bk);font-family:var(--fc);font-weight:800;font-size:10px;padding:3px 6px;border-radius:3px;}
@@ -167,29 +167,48 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 
 /* ── MOBILE ── */
 @media (max-width: 700px) {
+  /* Layout: una sola columna, sin tabla */
   .layout{grid-template-columns:1fr;min-height:unset;}
-  .fs{max-height:unset;border-right:none;border-bottom:1px solid var(--br);}
-  /* Ocultar tabla en móvil — solo mostrar barra superior con contador + Excel */
-  .ts{display:flex;flex-direction:column;}
-  .tsh{padding:10px 14px;gap:8px;flex-wrap:wrap;}
-  .tsh .tst{font-size:12px;}
-  /* Ocultar tabla y empty state, solo dejar header con botón Excel */
-  #tblWrap{display:none !important;}
-  #emSt{display:none !important;}
-  /* Botón Excel más grande y visible en móvil */
-  .bxl{padding:9px 18px;font-size:12px;border-radius:6px;}
-  /* Hacer scan banner más prominente */
+  .fs{max-height:unset;border-right:none;border-bottom:none;overflow-y:visible;}
+  .fi{padding:14px 14px 100px;}  /* padding-bottom para que nada quede tapado por la barra fija */
+  /* Ocultar sección de tabla completamente */
+  .ts{display:none;}
+  /* Scan banner más grande */
   .sb{padding:16px;margin-bottom:16px;}
   .sbt{font-size:13px;}
-  /* Formulario manual — stack columnas en pantalla chica */
+  /* Formulario: apilar todas las columnas */
   .fg.c2,.fg.c3,.tp{grid-template-columns:1fr;}
   .rg,.rg.c3{grid-template-columns:1fr;}
-  /* Modales full width */
-  .mo,.rmo{max-width:100%;border-radius:0;max-height:100vh;margin:0;}
-  /* Aviso móvil debajo del botón Excel */
-  #mobileNote{display:block;}
+  /* Botón guardar */
+  .bgen{margin-top:10px;padding:13px;}
+  /* Modales full screen */
+  .mo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;margin:0;}
+  .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;overflow-y:auto;}
+  /* Barra fija inferior */
+  #mobileBar{display:flex;}
 }
-@media (min-width: 701px){#mobileNote{display:none;}}
+@media (min-width: 701px){
+  #mobileNote{display:none;}
+  #mobileBar{display:none;}
+}
+/* Barra fija inferior móvil */
+#mobileBar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:400;
+  background:var(--dk);border-top:1px solid var(--br2);
+  padding:10px 16px 14px;
+  align-items:center;justify-content:space-between;gap:10px;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.4);
+}
+#mobileBar .mb-cnt{font-family:var(--fc);font-size:12px;color:var(--mu);}
+#mobileBar .mb-cnt strong{color:var(--y);font-size:15px;}
+#mobileBar .mb-xl{
+  flex:1;background:var(--y);color:var(--bk);border:none;border-radius:8px;
+  padding:12px;font-family:var(--fc);font-size:14px;font-weight:800;
+  text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;
+}
+#mobileBar .mb-xl:disabled{opacity:0.35;cursor:default;}
+#mobileBar .mb-xl:active{transform:scale(0.97);}
 </style>
 </head>
 <body>
@@ -369,6 +388,12 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- BARRA FIJA MÓVIL -->
+<div id="mobileBar">
+  <div class="mb-cnt"><strong id="mbCount">0</strong> registros</div>
+  <button class="mb-xl" id="mbExcel" onclick="exportExcel()" disabled>⬇ Descargar Excel</button>
+</div>
+
 <script>
 const SUFFIX=`EL CONECTOR Y LA MANGUERA DEBEN SER PROPORCIONADOS POR EL MISMO PROVEEDOR. EL CRIMPADO ENTRE LA MANGUERA Y LAS CONEXIONES DEBERÁ SUJETARSE A LA NORMA SAE J516 O SU EQUIVALENTE EN NORMA EN. EL ENSAMBLE DEBERÁ TENER UN NÚMERO DE IDENTIFICACIÓN ÚNICO CORRELATIVO DEL PROVEEDOR SIN DEFORMARLO (NÚMERO DE ARTÍCULO; EN CASO DE NO TENER NÚMERO DE ARTÍCULO COLOCAR EL NÚMERO DE ORDEN DE TRABAJO) Y LA FECHA DE ENSAMBLE REALIZADOS CON LÁPIZ ELÉCTRICO. DEBERÁ VENIR ENSAMBLADA CON ACOPLES PERMANENTES Y NO SE DEBE PELAR LA MANGUERA PARA EL CRIMPADO. DEBERÁ ESTAR SECA Y LIMPIA EN SU INTERIOR ASÍ MISMO TENER EN AMBOS EXTREMOS TAPONES DE PLÁSTICO ROSCADOS PARA SU PROTECCIÓN Y SE DEBERÁ SUMINISTRAR DE FORMA INDIVIDUAL EN UNA BOLSA PLÁSTICA RESISTENTE.`;
 const STOR='suminregio_v5';
@@ -485,6 +510,11 @@ function addEntry(){
 function render(){
   const tb=document.getElementById('tb'),em=document.getElementById('em'),tw=document.getElementById('tw'),btn=document.getElementById('bex');
   document.getElementById('rc').textContent=records.length;
+  // Sync mobile bar
+  const mbCount=document.getElementById('mbCount');
+  const mbExcel=document.getElementById('mbExcel');
+  if(mbCount) mbCount.textContent=records.length;
+  if(mbExcel) mbExcel.disabled=!records.length;
   if(!records.length){em.style.display='flex';tw.style.display='none';btn.disabled=true;return;}
   em.style.display='none';tw.style.display='block';btn.disabled=false;
   tb.innerHTML=records.map((r,i)=>`<tr id="row-${r.id}" ${i>=records.length-3?'class="nr"':''}><td class="num">${i+1}</td><td>${r.planta||'—'}</td><td>${r.subplanta||'—'}</td><td>${r.maquina||'—'}</td><td>${r.equipo||'—'}</td><td>${r.ubicacion||'—'}</td><td><span class="chip">${r.diametro}</span></td><td><span class="chip">${r.sae}</span></td><td>${r.presion} PSI</td><td>${r.longitud} mm</td><td>${r.recubrimiento||'—'}</td><td class="wc">${r.conA}${r.adaptA?`<br><span style="color:var(--mu2);font-size:9px">+${r.adaptA}</span>`:''}</td><td class="wc">${r.conB}${r.adaptB?`<br><span style="color:var(--mu2);font-size:9px">+${r.adaptB}</span>`:''}</td><td class="wc" style="color:var(--mu)">${r.comentarios||'—'}</td><td class="dc">${r.descripcion.substring(0,90)}…</td><td><div class="ra"><button class="bcp" onclick="cpDesc(${r.id},this)">📋</button><button class="bdl" onclick="delRow(${r.id})">✕</button></div></td></tr>`).join('');
