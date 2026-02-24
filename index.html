@@ -165,6 +165,31 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 .bconf:hover{background:var(--y2);}
 .bconf:disabled{opacity:0.4;cursor:default;}
 
+/* ── MOBILE ── */
+@media (max-width: 700px) {
+  .layout{grid-template-columns:1fr;min-height:unset;}
+  .fs{max-height:unset;border-right:none;border-bottom:1px solid var(--br);}
+  /* Ocultar tabla en móvil — solo mostrar barra superior con contador + Excel */
+  .ts{display:flex;flex-direction:column;}
+  .tsh{padding:10px 14px;gap:8px;flex-wrap:wrap;}
+  .tsh .tst{font-size:12px;}
+  /* Ocultar tabla y empty state, solo dejar header con botón Excel */
+  #tblWrap{display:none !important;}
+  #emSt{display:none !important;}
+  /* Botón Excel más grande y visible en móvil */
+  .bxl{padding:9px 18px;font-size:12px;border-radius:6px;}
+  /* Hacer scan banner más prominente */
+  .sb{padding:16px;margin-bottom:16px;}
+  .sbt{font-size:13px;}
+  /* Formulario manual — stack columnas en pantalla chica */
+  .fg.c2,.fg.c3,.tp{grid-template-columns:1fr;}
+  .rg,.rg.c3{grid-template-columns:1fr;}
+  /* Modales full width */
+  .mo,.rmo{max-width:100%;border-radius:0;max-height:100vh;margin:0;}
+  /* Aviso móvil debajo del botón Excel */
+  #mobileNote{display:block;}
+}
+@media (min-width: 701px){#mobileNote{display:none;}}
 </style>
 </head>
 <body>
@@ -325,6 +350,10 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
         <button class="bxl" id="bex" onclick="exportExcel()" disabled>↓ Excel</button>
         <button class="bclr" onclick="clearAll()">Limpiar</button>
       </div>
+    </div>
+    <div id="mobileNote" style="padding:10px 14px;background:rgba(245,197,24,0.07);border-bottom:1px solid rgba(245,197,24,0.15);font-size:11px;color:#888;line-height:1.6;">
+      📱 En móvil la tabla está oculta para mayor comodidad.<br>
+      Usa <strong style="color:#f5c518">↓ Excel</strong> para descargar todos los registros.
     </div>
     <div class="empty" id="em">
       <div class="ei">📋</div>
