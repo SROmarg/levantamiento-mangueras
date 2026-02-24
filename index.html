@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bk:#0a0a0a;--dk:#111;--dk2:#1a1a1a;--dk3:#222;--br:#2e2e2e;--br2:#3a3a3a;--y:#f5c518;--y2:#ffd740;--yd:rgba(245,197,24,0.12);--yd2:rgba(245,197,24,0.05);--w:#fff;--tx:#e8e8e8;--mu:#888;--mu2:#555;--gn:#22c55e;--rd:#ef4444;--fn:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bk);color:var(--tx);font-family:var(--fn);min-height:100vh;font-size:13px;}
+/* HEADER */
+header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;height:50px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:300;}
+.lb{background:var(--y);color:var(--bk);font-family:var(--fc);font-weight:800;font-size:10px;padding:3px 6px;border-radius:3px;}
+.ln{font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w);}
+.ln span{color:var(--y);}
+.hd{width:1px;height:20px;background:var(--br2);}
+.ht{font-family:var(--fc);font-size:11px;font-weight:600;color:var(--mu);letter-spacing:1px;text-transform:uppercase;}
+.hr{margin-left:auto;}
+.sp{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--gn);font-size:10px;padding:2px 8px;border-radius:20px;display:flex;align-items:center;gap:4px;opacity:0;transition:opacity 0.4s;}
+.sp.show{opacity:1;}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:370px 1fr;min-height:calc(100vh - 50px);}
+.fs{background:var(--dk);border-right:1px solid var(--br);overflow-y:auto;max-height:calc(100vh - 50px);}
+.fi{padding:18px 16px 28px;}
+/* SCAN BANNER */
+.sb{border-radius:7px;padding:12px;margin-bottom:14px;background:var(--dk2);border:1.5px dashed var(--y);cursor:pointer;transition:all 0.2s;}
+.sb:hover{background:var(--yd);}
+.sbt{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--y);margin-bottom:3px;}
+.sb p{font-size:10.5px;color:var(--mu);line-height:1.5;}
+.stag{display:inline-flex;background:var(--yd);border:1px solid rgba(245,197,24,0.3);color:var(--y);font-family:var(--fc);font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:3px;margin-top:4px;}
+/* OVERLAYS */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
+.mo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--y);border-radius:9px;padding:20px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;}
+.mot{font-family:var(--fc);font-size:13px;font-weight:800;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.mo p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:10px;}
+.ib{background:var(--yd);border:1px solid rgba(245,197,24,0.25);border-radius:5px;padding:8px 10px;margin-bottom:10px;font-size:10.5px;color:var(--y);line-height:1.7;}
+.dz{border:1.5px dashed var(--br2);border-radius:7px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+.dz:hover,.dz.over{border-color:var(--y);background:var(--yd);}
+.dzi{font-size:24px;margin-bottom:4px;}
+.dz p{font-size:11px;color:var(--mu);}
+.dz strong{color:var(--y);font-family:var(--fc);}
+.bq{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;max-height:200px;overflow-y:auto;}
+.bi{background:var(--dk2);border:1px solid var(--br);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:9px;transition:border-color 0.2s;}
+.bi.processing{border-color:var(--y);}
+.bi.done{border-color:var(--gn);opacity:0.7;}
+.bi.error{border-color:var(--rd);}
+.bith{width:42px;height:42px;object-fit:cover;border-radius:3px;flex-shrink:0;border:1px solid var(--br);}
+.bii{flex:1;min-width:0;}
+.bin{font-family:var(--fc);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bis{font-size:10px;margin-top:2px;}
+.bis.pending{color:var(--mu);}
+.bis.processing{color:var(--y);}
+.bis.done{color:var(--gn);}
+.bis.error{color:var(--rd);}
+.birm{background:none;border:none;color:var(--mu2);font-size:12px;cursor:pointer;flex-shrink:0;}
+.birm:hover{color:var(--rd);}
+.mbtns{display:flex;gap:8px;}
+.bstart{flex:1;background:var(--y);color:var(--bk);border:none;border-radius:5px;padding:9px;font-family:var(--fc);font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer;}
+.bstart:hover{background:var(--y2);}
+.bstart:disabled{opacity:0.4;cursor:default;}
+.bcanc{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:5px;padding:9px 12px;font-size:11px;cursor:pointer;}
+.bcanc:hover{border-color:var(--rd);color:var(--rd);}
+/* REVIEW */
+.rmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--gn);border-radius:9px;padding:18px;max-width:640px;width:100%;}
+.rmt{font-family:var(--fc);font-size:12px;font-weight:800;color:var(--gn);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.rmc{font-size:10px;color:var(--mu);margin-bottom:8px;}
+.rlay{display:grid;grid-template-columns:120px 1fr;gap:12px;margin-bottom:10px;}
+.rimg{width:100%;border-radius:4px;border:1px solid var(--br);object-fit:contain;background:var(--dk2);max-height:170px;}
+.rst{font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--y);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--br);}
+.rs{margin-bottom:8px;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;}
+.rg.c1{grid-template-columns:1fr;}
+.rg.c3{grid-template-columns:1fr 1fr 1fr;}
+.rf label{display:block;font-size:8.5px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--mu);margin-bottom:2px;}
+.rf input,.rf select{width:100%;background:var(--dk2);border:1px solid var(--br2);border-radius:3px;padding:4px 6px;color:var(--tx);font-family:var(--fn);font-size:10.5px;outline:none;}
+.rf input:focus,.rf select:focus{border-color:var(--y);}
+.rf input.sc,.rf select.sc{border-color:var(--y);background:rgba(245,197,24,0.07);}
+.tabs{display:flex;gap:4px;margin-bottom:8px;}
+.tab{flex:1;padding:5px;background:var(--dk2);border:1px solid var(--br2);border-radius:3px;font-family:var(--fc);font-size:10.5px;font-weight:700;color:var(--mu);cursor:pointer;text-align:center;transition:all 0.15s;}
+.tab.active{background:var(--yd);border-color:var(--y);color:var(--y);}
+.mp{display:none;}
+.mp.active{display:block;}
+.rbtns{display:flex;gap:8px;margin-top:10px;}
+.bsave{flex:1;background:var(--gn);color:var(--bk);border:none;border-radius:5px;padding:9px;font-family:var(--fc);font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer;}
+.bsave:hover{background:#16a34a;}
+.bskip{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:5px;padding:9px 11px;font-size:10.5px;cursor:pointer;}
+.bskip:hover{border-color:var(--rd);color:var(--rd);}
+/* FORM */
+.sec{display:flex;align-items:center;gap:8px;margin:16px 0 9px;}
+.sec:first-child{margin-top:0;}
+.sn{background:var(--y);color:var(--bk);font-family:var(--fc);font-weight:800;font-size:8.5px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sl{font-family:var(--fc);font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--y);}
+.sl2{flex:1;height:1px;background:var(--br);}
+.fg{display:grid;gap:6px;margin-bottom:6px;}
+.fg.c2{grid-template-columns:1fr 1fr;}
+.fg.c3{grid-template-columns:1fr 1fr 1fr;}
+.fg.c1{grid-template-columns:1fr;}
+label{display:block;font-size:9px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--mu);margin-bottom:3px;}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--dk2);border:1px solid var(--br2);border-radius:4px;padding:6px 8px;color:var(--tx);font-family:var(--fn);font-size:11.5px;outline:none;transition:border-color 0.15s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--y);background:var(--dk3);}
+select option{background:var(--dk2);}
+textarea{resize:vertical;min-height:46px;}
+.tp{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.tc{background:var(--dk2);border:1px solid var(--br);border-radius:5px;padding:9px;}
+.tc.a{border-top:2px solid var(--y);}
+.tc.b{border-top:2px solid var(--mu2);}
+.th{font-family:var(--fc);font-size:8.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
+.th.a{color:var(--y);}
+.th.b{color:var(--mu);}
+.fii{margin-bottom:5px;}
+.fii:last-child{margin-bottom:0;}
+.bgen{width:100%;margin-top:14px;padding:11px;background:var(--y);color:var(--bk);border:none;border-radius:5px;font-family:var(--fc);font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.bgen:hover{background:var(--y2);}
+/* TABLE */
+.ts{display:flex;flex-direction:column;overflow:hidden;}
+.th2{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--br);flex-shrink:0;background:var(--dk);}
+.ttl{font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--w);display:flex;align-items:center;gap:8px;}
+.cb{background:var(--yd);border:1px solid rgba(245,197,24,0.3);color:var(--y);font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;}
+.tacts{display:flex;gap:6px;}
+.bxl{background:var(--y);color:var(--bk);border:none;border-radius:4px;padding:5px 10px;font-family:var(--fc);font-size:10.5px;font-weight:700;text-transform:uppercase;cursor:pointer;}
+.bxl:hover{background:var(--y2);}
+.bxl:disabled{opacity:0.35;cursor:default;}
+.bclr{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:4px;padding:5px 9px;font-size:10px;cursor:pointer;}
+.bclr:hover{border-color:var(--rd);color:var(--rd);}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--mu2);}
+.ei{width:50px;height:50px;border:2px dashed var(--br2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:0.4;}
+.empty p{font-size:11.5px;text-align:center;line-height:1.8;}
+.empty strong{color:var(--y);}
+.tw{overflow:auto;flex:1;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+thead th{background:var(--dk2);color:var(--mu);font-family:var(--fc);font-size:8.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--br);white-space:nowrap;position:sticky;top:0;z-index:10;border-right:1px solid var(--br);}
+thead th:last-child{border-right:none;}
+tbody tr{border-bottom:1px solid var(--br);transition:background 0.1s;}
+tbody tr:hover{background:var(--yd2);}
+tbody tr.nr{animation:ri 0.5s ease;}
+@keyframes ri{from{background:rgba(245,197,24,0.1);}to{background:transparent;}}
+tbody td{padding:6px 9px;vertical-align:top;color:var(--tx);white-space:nowrap;border-right:1px solid var(--br);}
+tbody td:last-child{border-right:none;}
+td.num{color:var(--mu2);font-size:9px;text-align:center;}
+td.dc{white-space:normal;max-width:200px;line-height:1.6;color:var(--mu);font-size:9.5px;}
+td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
+.chip{display:inline-flex;background:var(--yd);border:1px solid rgba(245,197,24,0.25);color:var(--y);font-family:var(--fc);font-weight:700;font-size:9.5px;padding:1px 5px;border-radius:3px;}
+.ra{display:flex;gap:3px;}
+.bcp,.bdl{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer;transition:all 0.15s;}
+.bcp:hover{border-color:var(--y);color:var(--y);}
+.bdl:hover{border-color:var(--rd);color:var(--rd);}
+.bcp.ok{border-color:var(--gn);color:var(--gn);}
+.toast{position:fixed;bottom:14px;right:14px;background:var(--dk2);border-radius:6px;padding:8px 12px;font-size:11.5px;font-weight:500;transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+.toast.ok{border:1px solid var(--gn);color:var(--gn);}
+.toast.warn{border:1px solid var(--y);color:var(--y);}
+.toast.err{border:1px solid var(--rd);color:var(--rd);}
+.toast.show{transform:translateY(0);opacity:1;}
+#fbi{display:none;}
+
+/* API KEY MODAL */
+.akmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--y);border-radius:9px;padding:24px;max-width:420px;width:100%;}
+.akmo h2{font-family:var(--fc);font-size:14px;font-weight:800;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.akmo p{font-size:11.5px;color:var(--mu);line-height:1.7;margin-bottom:12px;}
+.akmo .hint{background:var(--yd);border:1px solid rgba(245,197,24,0.25);border-radius:5px;padding:8px 11px;font-size:10.5px;color:var(--y);line-height:1.7;margin-bottom:12px;}
+.akmo input{width:100%;background:var(--dk2);border:1px solid var(--br2);border-radius:5px;padding:9px 11px;color:var(--tx);font-family:monospace;font-size:12px;outline:none;margin-bottom:10px;}
+.akmo input:focus{border-color:var(--y);}
+.akmo .err{font-size:10.5px;color:var(--rd);margin-bottom:8px;display:none;}
+.bconf{width:100%;background:var(--y);color:var(--bk);border:none;border-radius:5px;padding:10px;font-family:var(--fc);font-size:13px;font-weight:800;text-transform:uppercase;cursor:pointer;}
+.bconf:hover{background:var(--y2);}
+.bconf:disabled{opacity:0.4;cursor:default;}
+
+</style>
+</head>
+<body>
+
+<!-- SCAN MODAL -->
+<div class="ov" id="scanOv" style="display:none">
+  <div class="mo">
+    <div class="mot">📷 Cargar formato físico</div>
+    <div class="ib"><strong>Formato 4 cuadrantes:</strong> Datos generales + Manguera 1 + Manguera 2 + Manguera 3<br><strong>1 foto → hasta 3 registros automáticos</strong></div>
+    <div class="dz" id="dz" onclick="document.getElementById('fbi').click()">
+      <div class="dzi">🖼️</div>
+      <p><strong>Haz clic o arrastra aquí</strong><br>Puedes cargar varias hojas a la vez</p>
+    </div>
+    <input type="file" id="fbi" accept="image/*" multiple onchange="onFiles(event)">
+    <div class="bq" id="bq" style="display:none"></div>
+    <div class="mbtns">
+      <button class="bstart" id="bstart" onclick="runBatch()" disabled>⚡ Analizar formatos</button>
+      <button class="bcanc" onclick="closeScan()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="ov" id="revOv" style="display:none">
+  <div class="rmo">
+    <div class="rmt">✓ Revisar datos extraídos</div>
+    <div class="rmc" id="rmc"></div>
+    <div class="rlay">
+      <img class="rimg" id="rimg" src="" alt="">
+      <div>
+        <div class="rs">
+          <div class="rst">Datos generales</div>
+          <div class="rg c1" style="margin-bottom:3px"><div class="rf"><label>Empresa / Cliente</label><input type="text" id="r_empresa"></div></div>
+          <div class="rg" style="margin-bottom:3px">
+            <div class="rf"><label>Planta</label><input type="text" id="r_planta"></div>
+            <div class="rf"><label>Subplanta</label><input type="text" id="r_subplanta"></div>
+          </div>
+          <div class="rg" style="margin-bottom:3px">
+            <div class="rf"><label>Máquina</label><input type="text" id="r_maquina"></div>
+            <div class="rf"><label>Equipo</label><input type="text" id="r_equipo"></div>
+          </div>
+          <div class="rg c1" style="margin-bottom:3px"><div class="rf"><label>Sub-Equipo / Ubicación</label><input type="text" id="r_subequipo"></div></div>
+          <div class="rg">
+            <div class="rf"><label>Técnico</label><input type="text" id="r_tecnico"></div>
+            <div class="rf"><label>Fecha</label><input type="text" id="r_fecha_lev"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rs">
+      <div class="rst">Mangueras</div>
+      <div class="tabs">
+        <div class="tab active" onclick="swTab(1)">Manguera 1</div>
+        <div class="tab" onclick="swTab(2)">Manguera 2</div>
+        <div class="tab" onclick="swTab(3)">Manguera 3</div>
+      </div>
+      <div id="mp1" class="mp active"></div>
+      <div id="mp2" class="mp"></div>
+      <div id="mp3" class="mp"></div>
+    </div>
+    <div class="rbtns">
+      <button class="bsave" onclick="saveRev()">✓ Guardar registros</button>
+      <button class="bskip" onclick="skipRev()">Omitir esta hoja</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+
+<!-- API KEY MODAL -->
+<div class="ov" id="akOv">
+  <div class="akmo">
+    <h2>🔑 Configurar API Key</h2>
+    <p>Para usar el escáner de fotos necesitas una API Key de Anthropic. Se guarda solo en tu navegador, nunca se comparte.</p>
+    <div class="hint">
+      1. Ve a <strong>console.anthropic.com</strong><br>
+      2. API Keys → Create Key<br>
+      3. Pega la key aquí abajo
+    </div>
+    <input type="password" id="akInput" placeholder="sk-ant-api03-..." oninput="document.getElementById('bconf').disabled=!this.value.startsWith('sk-ant')">
+    <div class="err" id="akErr">La key debe comenzar con sk-ant-api03-</div>
+    <button class="bconf" id="bconf" onclick="saveKey()" disabled>Guardar y continuar</button>
+  </div>
+</div>
+
+<header>
+  <div class="lb">SR</div>
+  <div class="ln">Suminregio <span>Industrial</span></div>
+  <div class="hd"></div>
+  <div class="ht">Levantamiento de Mangueras</div>
+  <div class="hr">
+    <div class="sp" id="sp">✓ Guardado</div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- FORM -->
+  <div class="fs">
+    <div class="fi">
+      <div class="sb" onclick="openScan()">
+        <div class="sbt">📷 Cargar formato físico impreso</div>
+        <p>Sube la foto del formato de 4 cuadrantes. Claude extrae datos generales y las 3 mangueras.</p>
+        <div class="stag">1 foto → hasta 3 registros automáticos</div>
+      </div>
+
+      <div class="sec"><div class="sn">1</div><div class="sl">Ubicación</div><div class="sl2"></div></div>
+      <div class="fg c2">
+        <div><label>Planta</label><input type="text" id="planta" placeholder="Ej: CHURUBUSCO"></div>
+        <div><label>Subplanta</label><input type="text" id="subplanta" placeholder="Ej: DECAPADO 1"></div>
+      </div>
+      <div class="fg c2">
+        <div><label>Máquina</label><input type="text" id="maquina" placeholder="Ej: PINCH ROLL"></div>
+        <div><label>Equipo</label><input type="text" id="equipo" placeholder="Ej: RODILLO CUNA 1"></div>
+      </div>
+      <div class="fg c1"><div><label>Donde se conecta</label><input type="text" id="ubicacion" placeholder="Ej: SALIDA B / MANGUERA A"></div></div>
+
+      <div class="sec"><div class="sn">2</div><div class="sl">Manguera</div><div class="sl2"></div></div>
+      <div class="fg c3">
+        <div><label>Diámetro</label><select id="diametro"><option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option></select></div>
+        <div><label>Tipo SAE</label><select id="sae"><option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option></select></div>
+        <div><label>Presión (PSI)</label><input type="number" id="presion" placeholder="3000"></div>
+      </div>
+      <div class="fg c2">
+        <div><label>Longitud (MM)</label><input type="number" id="longitud" placeholder="570"></div>
+        <div><label>Recubrimiento</label><select id="recubrimiento"><option value="">Sin recubrimiento</option><option>ANTIFLAMA</option><option>PROTECTOR TÉRMICO</option><option>ESPIRAL METÁLICO</option><option>FUNDA TEXTIL</option></select></div>
+      </div>
+
+      <div class="sec"><div class="sn">3</div><div class="sl">Terminales</div><div class="sl2"></div></div>
+      <div class="tp">
+        <div class="tc a"><div class="th a">▲ Terminal A</div>
+          <div class="fii"><label>Conector</label><input type="text" id="conA" placeholder='JIC 3/4" HEMBRA RECTO'></div>
+          <div class="fii"><label>Adaptador</label><input type="text" id="adaptA" placeholder="BRIDA 3/4 RECTA"></div>
+        </div>
+        <div class="tc b"><div class="th b">▲ Terminal B</div>
+          <div class="fii"><label>Conector</label><input type="text" id="conB" placeholder='JIC 3/4" HEMBRA RECTO'></div>
+          <div class="fii"><label>Adaptador</label><input type="text" id="adaptB" placeholder="BRIDA 90° 3/4"></div>
+        </div>
+      </div>
+
+      <div class="sec"><div class="sn">4</div><div class="sl">Observaciones</div><div class="sl2"></div></div>
+      <div class="fg c1"><div><label>Comentarios</label><textarea id="comentarios" placeholder="Mejoras, notas de ruteo, cambios, etc."></textarea></div></div>
+      <button class="bgen" onclick="addEntry()">⚡ Guardar y generar descripción</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="ts">
+    <div class="th2">
+      <div class="ttl">Registros <span class="cb" id="rc">0</span></div>
+      <div class="tacts">
+        <button class="bxl" id="bex" onclick="exportExcel()" disabled>↓ Excel</button>
+        <button class="bclr" onclick="clearAll()">Limpiar</button>
+      </div>
+    </div>
+    <div class="empty" id="em">
+      <div class="ei">📋</div>
+      <p>Carga una foto del formato físico<br>o llena el formulario manualmente.<br><strong>1 foto = hasta 3 registros</strong></p>
+    </div>
+    <div class="tw" id="tw" style="display:none">
+      <table>
+        <thead><tr><th>#</th><th>Planta</th><th>Subplanta</th><th>Máquina</th><th>Equipo</th><th>Ubicación</th><th>Diám.</th><th>SAE</th><th>Presión</th><th>Long.</th><th>Recubrim.</th><th>Term. A</th><th>Term. B</th><th>Comentarios</th><th>Descripción</th><th></th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUFFIX=`EL CONECTOR Y LA MANGUERA DEBEN SER PROPORCIONADOS POR EL MISMO PROVEEDOR. EL CRIMPADO ENTRE LA MANGUERA Y LAS CONEXIONES DEBERÁ SUJETARSE A LA NORMA SAE J516 O SU EQUIVALENTE EN NORMA EN. EL ENSAMBLE DEBERÁ TENER UN NÚMERO DE IDENTIFICACIÓN ÚNICO CORRELATIVO DEL PROVEEDOR SIN DEFORMARLO (NÚMERO DE ARTÍCULO; EN CASO DE NO TENER NÚMERO DE ARTÍCULO COLOCAR EL NÚMERO DE ORDEN DE TRABAJO) Y LA FECHA DE ENSAMBLE REALIZADOS CON LÁPIZ ELÉCTRICO. DEBERÁ VENIR ENSAMBLADA CON ACOPLES PERMANENTES Y NO SE DEBE PELAR LA MANGUERA PARA EL CRIMPADO. DEBERÁ ESTAR SECA Y LIMPIA EN SU INTERIOR ASÍ MISMO TENER EN AMBOS EXTREMOS TAPONES DE PLÁSTICO ROSCADOS PARA SU PROTECCIÓN Y SE DEBERÁ SUMINISTRAR DE FORMA INDIVIDUAL EN UNA BOLSA PLÁSTICA RESISTENTE.`;
+const STOR='suminregio_v5';
+let records=[],files=[],results=[],rIdx=0;
+
+// Storage
+
+// API KEY MANAGEMENT
+let API_KEY = localStorage.getItem('sr_apikey') || '';
+function checkKey(){
+  if(!API_KEY){document.getElementById('akOv').style.display='flex';}
+  else{document.getElementById('akOv').style.display='none';}
+}
+function saveKey(){
+  const val=document.getElementById('akInput').value.trim();
+  if(!val.startsWith('sk-ant')){document.getElementById('akErr').style.display='block';return;}
+  API_KEY=val;
+  localStorage.setItem('sr_apikey',val);
+  document.getElementById('akOv').style.display='none';
+  toast('✓ API Key guardada','ok');
+}
+
+function load(){try{const s=localStorage.getItem(STOR);if(s){records=JSON.parse(s);render();}}catch(e){}}
+function save(){try{localStorage.setItem(STOR,JSON.stringify(records));const el=document.getElementById('sp');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}catch(e){}}
+const g=id=>document.getElementById(id)?.value.trim()||'';
+const gU=id=>g(id).toUpperCase();
+
+function desc(r){const tA=r.adaptA?`${r.conA} CON ADAPTADOR ${r.adaptA}`:r.conA;const tB=r.adaptB?`${r.conB} CON ADAPTADOR ${r.adaptB}`:r.conB;const rc=r.recubrimiento?` CON RECUBRIMIENTO ${r.recubrimiento}`:'';return `MANGUERA HIDRÁULICA CON DIÁMETRO INTERIOR DE ${r.diametro} SAE ${r.sae} PARA UNA PRESIÓN DE TRABAJO DE ${r.presion} PSI CON UNA LONGITUD DE ${r.longitud} MM${rc}. FORMA TERMINAL "A": ${tA}. FORMA TERMINAL "B": ${tB}. ${SUFFIX}`;}
+
+// Manguera panel HTML
+function mpHTML(n){
+  const ds=`<option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option>`;
+  const ss=`<option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option>`;
+  return `<div class="rg c1" style="margin-bottom:3px"><div class="rf"><label>Donde se conecta</label><input type="text" id="r${n}_ubicacion"></div></div><div class="rg c3" style="margin-bottom:3px"><div class="rf"><label>Diámetro</label><select id="r${n}_diametro">${ds}</select></div><div class="rf"><label>SAE</label><select id="r${n}_sae">${ss}</select></div><div class="rf"><label>Presión</label><input type="number" id="r${n}_presion"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Longitud (MM)</label><input type="number" id="r${n}_longitud"></div><div class="rf"><label>Recubrimiento</label><input type="text" id="r${n}_recubrimiento"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector A</label><input type="text" id="r${n}_conA"></div><div class="rf"><label>Adaptador A</label><input type="text" id="r${n}_adaptA"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector B</label><input type="text" id="r${n}_conB"></div><div class="rf"><label>Adaptador B</label><input type="text" id="r${n}_adaptB"></div></div><div class="rg c1"><div class="rf"><label>Comentarios</label><input type="text" id="r${n}_comentarios"></div></div>`;
+}
+[1,2,3].forEach(n=>document.getElementById(`mp${n}`).innerHTML=mpHTML(n));
+
+// Scan
+function openScan(){files=[];document.getElementById('bq').innerHTML='';document.getElementById('bq').style.display='none';document.getElementById('bstart').disabled=true;document.getElementById('scanOv').style.display='flex';}
+function closeScan(){document.getElementById('scanOv').style.display='none';files=[];}
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')));});
+function onFiles(e){addFiles([...e.target.files]);e.target.value='';}
+function addFiles(flist){flist.forEach(f=>{const r=new FileReader();r.onload=ev=>{files.push({b64:ev.target.result.split(',')[1],mime:f.type||'image/jpeg',name:f.name,url:ev.target.result,status:'pending'});renderQ();};r.readAsDataURL(f);});}
+function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}"><img class="bith" src="${f.url}"><div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
+
+const PROMPT=`Eres un asistente que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":3,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""}]}. diametro: 1/4" 3/8" 1/2" 5/8" 3/4" 1" etc. sae: exactamente 100R1AT 100R2AT 100R12 100R13 100R15 100R17. presion y longitud solo número. Cuadrantes vacíos dejar "".`;
+
+async function runBatch(){
+  if(!files.length)return;
+  document.getElementById('bstart').disabled=true;
+  results=[];
+  for(let i=0;i<files.length;i++){
+    files[i].status='processing';renderQ();
+    try{
+      const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:files[i].mime,data:files[i].b64}},{type:"text",text:PROMPT}]}]})});
+      const data=await resp.json();
+      if(!resp.ok||data.error)throw new Error(data.error?.message||`HTTP ${resp.status}`);
+      const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+      results.push({data:JSON.parse(raw),url:files[i].url});
+      files[i].status='done';
+    }catch(e){
+      files[i].status='error';files[i].err=e.message.substring(0,40);
+      results.push(null);toast('Error: '+e.message.substring(0,70),'err');
+    }
+    renderQ();
+  }
+  await new Promise(r=>setTimeout(r,400));
+  closeScan();rIdx=0;nextReview();
+}
+
+function swTab(n){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));document.querySelectorAll('.mp').forEach((p,i)=>p.classList.toggle('active',i===n-1));}
+function fSel(id,val){if(!val)return;const el=document.getElementById(id);if(!el)return;const v=val.toLowerCase();const m=[...el.options].find(o=>o.value&&(o.value.toLowerCase()===v||v.includes(o.value.toLowerCase())));if(m){el.value=m.value;el.classList.add('sc');}}
+
+function nextReview(){
+  while(rIdx<results.length&&!results[rIdx])rIdx++;
+  if(rIdx>=results.length){document.getElementById('revOv').style.display='none';toast('✓ Todos los formatos procesados','ok');return;}
+  const tot=results.filter(Boolean).length,done=results.slice(0,rIdx).filter(Boolean).length;
+  document.getElementById('rmc').textContent=`Hoja ${done+1} de ${tot}`;
+  document.getElementById('rimg').src=results[rIdx].url;
+  const{data}=results[rIdx],gen=data.generales||{};
+  const gm={empresa:'r_empresa',planta:'r_planta',subplanta:'r_subplanta',maquina:'r_maquina',equipo:'r_equipo',subequipo:'r_subequipo',tecnico:'r_tecnico',fecha_levantamiento:'r_fecha_lev'};
+  Object.entries(gm).forEach(([k,id])=>{const el=document.getElementById(id);if(el){el.value=gen[k]||'';el.classList.toggle('sc',!!(gen[k]));}});
+  (data.mangueras||[]).forEach((m,idx)=>{const n=idx+1;['ubicacion','presion','longitud','recubrimiento','conA','adaptA','conB','adaptB','comentarios'].forEach(f=>{const el=document.getElementById(`r${n}_${f}`);if(el){el.value=m[f]||'';el.classList.toggle('sc',!!(m[f]));} });fSel(`r${n}_diametro`,m.diametro);fSel(`r${n}_sae`,m.sae);});
+  swTab(1);document.getElementById('revOv').style.display='flex';
+}
+
+function saveRev(){
+  const rv=id=>document.getElementById(id)?.value.trim()||'',rvU=id=>rv(id).toUpperCase();
+  const gen={planta:rvU('r_planta'),subplanta:rvU('r_subplanta'),maquina:rvU('r_maquina'),equipo:rvU('r_equipo')};
+  let saved=0;
+  for(let n=1;n<=3;n++){
+    const d=rv(`r${n}_diametro`),s=rv(`r${n}_sae`),p=rv(`r${n}_presion`),l=rv(`r${n}_longitud`),cA=rvU(`r${n}_conA`),cB=rvU(`r${n}_conB`);
+    if(!d||!s||!p||!l||!cA||!cB)continue;
+    const r={id:Date.now()+n,fecha:new Date().toLocaleDateString('es-MX'),...gen,ubicacion:rvU(`r${n}_ubicacion`),diametro:d,sae:s,presion:p,longitud:l,recubrimiento:rvU(`r${n}_recubrimiento`),conA:cA,adaptA:rvU(`r${n}_adaptA`),conB:cB,adaptB:rvU(`r${n}_adaptB`),comentarios:rv(`r${n}_comentarios`)};
+    r.descripcion=desc(r);records.push(r);saved++;
+  }
+  if(!saved){toast('Completa al menos una manguera con los campos requeridos','warn');return;}
+  save();render();toast(`✓ ${saved} registro${saved>1?'s':''} guardados`,'ok');
+  rIdx++;nextReview();
+}
+function skipRev(){rIdx++;nextReview();}
+
+function addEntry(){
+  const d=g('diametro'),s=g('sae'),p=g('presion'),l=g('longitud'),cA=gU('conA'),cB=gU('conB');
+  if(!d||!s||!p||!l||!cA||!cB){toast('Completa: Diámetro, SAE, Presión, Longitud, Conector A y B','warn');return;}
+  const r={id:Date.now(),fecha:new Date().toLocaleDateString('es-MX'),planta:gU('planta'),subplanta:gU('subplanta'),maquina:gU('maquina'),equipo:gU('equipo'),ubicacion:gU('ubicacion'),diametro:d,sae:s,presion:p,longitud:l,recubrimiento:g('recubrimiento').toUpperCase(),conA:cA,adaptA:gU('adaptA'),conB:cB,adaptB:gU('adaptB'),comentarios:g('comentarios')};
+  r.descripcion=desc(r);records.push(r);save();render();clearForm();toast('✓ Registro guardado','ok');
+}
+
+function render(){
+  const tb=document.getElementById('tb'),em=document.getElementById('em'),tw=document.getElementById('tw'),btn=document.getElementById('bex');
+  document.getElementById('rc').textContent=records.length;
+  if(!records.length){em.style.display='flex';tw.style.display='none';btn.disabled=true;return;}
+  em.style.display='none';tw.style.display='block';btn.disabled=false;
+  tb.innerHTML=records.map((r,i)=>`<tr id="row-${r.id}" ${i>=records.length-3?'class="nr"':''}><td class="num">${i+1}</td><td>${r.planta||'—'}</td><td>${r.subplanta||'—'}</td><td>${r.maquina||'—'}</td><td>${r.equipo||'—'}</td><td>${r.ubicacion||'—'}</td><td><span class="chip">${r.diametro}</span></td><td><span class="chip">${r.sae}</span></td><td>${r.presion} PSI</td><td>${r.longitud} mm</td><td>${r.recubrimiento||'—'}</td><td class="wc">${r.conA}${r.adaptA?`<br><span style="color:var(--mu2);font-size:9px">+${r.adaptA}</span>`:''}</td><td class="wc">${r.conB}${r.adaptB?`<br><span style="color:var(--mu2);font-size:9px">+${r.adaptB}</span>`:''}</td><td class="wc" style="color:var(--mu)">${r.comentarios||'—'}</td><td class="dc">${r.descripcion.substring(0,90)}…</td><td><div class="ra"><button class="bcp" onclick="cpDesc(${r.id},this)">📋</button><button class="bdl" onclick="delRow(${r.id})">✕</button></div></td></tr>`).join('');
+}
+function cpDesc(id,btn){const r=records.find(x=>x.id===id);if(!r)return;navigator.clipboard.writeText(r.descripcion).then(()=>{btn.textContent='✓';btn.classList.add('ok');setTimeout(()=>{btn.textContent='📋';btn.classList.remove('ok');},2000);});}
+function delRow(id){if(!confirm('¿Eliminar?'))return;records=records.filter(r=>r.id!==id);save();render();}
+function clearAll(){if(!confirm('¿Eliminar todos los registros?'))return;records=[];localStorage.removeItem(STOR);render();}
+function clearForm(){['planta','subplanta','maquina','equipo','ubicacion','presion','longitud','conA','adaptA','conB','adaptB','comentarios'].forEach(id=>document.getElementById(id).value='');['diametro','sae','recubrimiento'].forEach(id=>document.getElementById(id).value='');}
+function exportExcel(){
+  if(!records.length)return;
+  const h=['FECHA','PLANTA','SUBPLANTA','MÁQUINA','EQUIPO','DONDE SE CONECTA','DIÁMETRO','SAE','PRESIÓN PSI','LONGITUD MM','RECUBRIMIENTO','CONECTOR A','ADAPTADOR A','CONECTOR B','ADAPTADOR B','COMENTARIOS','DESCRIPCIÓN DE MANGUERA'];
+  const rows=records.map(r=>[r.fecha,r.planta,r.subplanta,r.maquina,r.equipo,r.ubicacion,r.diametro,r.sae,Number(r.presion),Number(r.longitud),r.recubrimiento,r.conA,r.adaptA,r.conB,r.adaptB,r.comentarios,r.descripcion]);
+  const ws=XLSX.utils.aoa_to_sheet([h,...rows]);ws['!cols']=[10,14,14,16,18,16,9,10,11,11,14,26,20,26,20,28,100].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Levantamiento');
+  XLSX.writeFile(wb,`Suminregio_Levantamiento_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('✓ Excel descargado','ok');
+}
+function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3500);}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')addEntry();});
+checkKey();
+load();
+</script>
+</body>
+</html>
