@@ -284,12 +284,19 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
       <div class="sec"><div class="sn">2</div><div class="sl">Manguera</div><div class="sl2"></div></div>
       <div class="fg c3">
         <div><label>Diámetro</label><select id="diametro"><option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option></select></div>
-        <div><label>Tipo SAE</label><select id="sae"><option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option></select></div>
-        <div><label>Presión (PSI)</label><input type="number" id="presion" placeholder="3000"></div>
+        <div><label>Tipo SAE</label><select id="sae"><option value="">--</option><option>100R2AT</option><option>100R12</option></select></div>
+        <div><label>Presión (PSI)</label>
+          <select id="presion">
+            <option value="">--</option>
+            <option value="3000">3K — 3000 PSI</option>
+            <option value="4000">4K — 4000 PSI</option>
+            <option value="5000">5K — 5000 PSI</option>
+            <option value="6000">6K — 6000 PSI</option>
+          </select></div>
       </div>
       <div class="fg c2">
         <div><label>Longitud (MM)</label><input type="number" id="longitud" placeholder="570"></div>
-        <div><label>Recubrimiento</label><select id="recubrimiento"><option value="">Sin recubrimiento</option><option>ANTIFLAMA</option><option>PROTECTOR TÉRMICO</option><option>ESPIRAL METÁLICO</option><option>FUNDA TEXTIL</option></select></div>
+        <div><label>Recubrimiento</label><input type="text" id="recubrimiento" placeholder="ANTIFLAMA / ESPIRAL METÁLICO"></div>
       </div>
 
       <div class="sec"><div class="sn">3</div><div class="sl">Terminales</div><div class="sl2"></div></div>
@@ -382,7 +389,7 @@ function onFiles(e){addFiles([...e.target.files]);e.target.value='';}
 function addFiles(flist){flist.forEach(f=>{const r=new FileReader();r.onload=ev=>{files.push({b64:ev.target.result.split(',')[1],mime:f.type||'image/jpeg',name:f.name,url:ev.target.result,status:'pending'});renderQ();};r.readAsDataURL(f);});}
 function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}"><img class="bith" src="${f.url}"><div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
 
-const PROMPT=`Eres un asistente que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":3,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""}]}. diametro: 1/4" 3/8" 1/2" 5/8" 3/4" 1" etc. sae: exactamente 100R1AT 100R2AT 100R12 100R13 100R15 100R17. presion y longitud solo número. Cuadrantes vacíos dejar "".`;
+const PROMPT=`Eres un asistente que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":3,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""}]}. REGLAS DE INTERPRETACIÓN: diametro: formato 1/4" 3/8" 1/2" 5/8" 3/4" 1" etc. sae: el campo tiene casillas R2 y R12 — si la casilla R2 está marcada (X o palomita) devuelve exactamente "100R2AT"; si R12 está marcada devuelve exactamente "100R12"; si ninguna está marcada deja "". presion: el campo tiene casillas 3K 4K 5K 6K — la casilla marcada equivale a: 3K=3000, 4K=4000, 5K=5000, 6K=6000 — devuelve solo el número sin unidades. recubrimiento: el campo tiene casillas Ninguno, Antiflama, Acero — pueden estar marcadas una o varias; si Ninguno está marcada (o ninguna) deja ""; si solo Antiflama está marcada devuelve "ANTIFLAMA"; si solo Acero está marcada devuelve "ESPIRAL METÁLICO"; si ambas Antiflama y Acero están marcadas devuelve "ANTIFLAMA + ESPIRAL METÁLICO". longitud: solo el número. Cuadrantes vacíos o sin marcar dejar "".`;
 
 async function runBatch(){
   if(!files.length)return;
