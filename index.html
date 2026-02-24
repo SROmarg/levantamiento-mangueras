@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no, address=no, email=no">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -31,6 +32,8 @@ header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;heig
 .stag{display:inline-flex;background:var(--yd);border:1px solid rgba(245,197,24,0.3);color:var(--y);font-family:var(--fc);font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:3px;margin-top:4px;}
 /* OVERLAYS */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
+/* En móvil el review modal se pega al fondo */
+@media(max-width:700px){.ov.rev-ov{align-items:flex-end;padding:0;overflow-y:hidden;}}
 .mo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--y);border-radius:9px;padding:20px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;}
 .mot{font-family:var(--fc);font-size:13px;font-weight:800;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
 .mo p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:10px;}
@@ -185,7 +188,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
   .bgen{margin-top:10px;padding:13px;}
   /* Modales full screen */
   .mo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;margin:0;}
-  .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;}
+  .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;max-height:88vh;}
   .rmo-body{padding:14px 14px 0;}
   .rmo-footer{padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,12px));}
   /* Barra fija inferior */
@@ -236,7 +239,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 </div>
 
 <!-- REVIEW MODAL -->
-<div class="ov" id="revOv" style="display:none">
+<div class="ov rev-ov" id="revOv" style="display:none">
   <div class="rmo">
     <div class="rmo-body">
     <div class="rmt">✓ Revisar datos extraídos</div>
@@ -266,9 +269,9 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="rs">
       <div class="rst">Mangueras</div>
       <div class="tabs">
-        <div class="tab active" onclick="swTab(1)">Manguera 1</div>
-        <div class="tab" onclick="swTab(2)">Manguera 2</div>
-        <div class="tab" onclick="swTab(3)">Manguera 3</div>
+        <div class="tab active" onclick="swTab(event,1)">Manguera 1</div>
+        <div class="tab" onclick="swTab(event,2)">Manguera 2</div>
+        <div class="tab" onclick="swTab(event,3)">Manguera 3</div>
       </div>
       <div id="mp1" class="mp active"></div>
       <div id="mp2" class="mp"></div>
@@ -476,7 +479,7 @@ async function runBatch(){
   closeScan();rIdx=0;nextReview();
 }
 
-function swTab(n){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));document.querySelectorAll('.mp').forEach((p,i)=>p.classList.toggle('active',i===n-1));}
+function swTab(e,n){if(e){e.preventDefault();e.stopPropagation();}document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));document.querySelectorAll('.mp').forEach((p,i)=>p.classList.toggle('active',i===n-1));}
 function fSel(id,val){if(!val)return;const el=document.getElementById(id);if(!el)return;const v=val.toLowerCase();const m=[...el.options].find(o=>o.value&&(o.value.toLowerCase()===v||v.includes(o.value.toLowerCase())));if(m){el.value=m.value;el.classList.add('sc');}}
 
 function nextReview(){
