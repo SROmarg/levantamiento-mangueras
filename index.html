@@ -65,9 +65,7 @@ header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;heig
 .bcanc{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:5px;padding:9px 12px;font-size:11px;cursor:pointer;}
 .bcanc:hover{border-color:var(--rd);color:var(--rd);}
 /* REVIEW */
-.rmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--gn);border-radius:9px;max-width:640px;width:100%;display:flex;flex-direction:column;max-height:88vh;}
-.rmo-body{flex:1;overflow-y:auto;padding:18px 18px 0;-webkit-overflow-scrolling:touch;}
-.rmo-footer{padding:12px 18px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--dk);border-top:1px solid var(--br2);}
+.rmo{background:var(--dk);border:1px solid var(--br2);border-top:3px solid var(--gn);border-radius:9px;padding:18px;max-width:640px;width:100%;overflow-y:auto;max-height:88vh;}
 .rmt{font-family:var(--fc);font-size:12px;font-weight:800;color:var(--gn);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
 .rmc{font-size:10px;color:var(--mu);margin-bottom:8px;}
 .rlay{display:grid;grid-template-columns:120px 1fr;gap:12px;margin-bottom:10px;}
@@ -189,8 +187,6 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
   /* Modales full screen */
   .mo{max-width:100%;width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:92vh;margin:0;}
   .rmo{max-width:100%;width:100%;border-radius:12px 12px 0 0;max-height:88vh;}
-  .rmo-body{padding:14px 14px 0;}
-  .rmo-footer{padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,12px));}
   /* Barra fija inferior */
   #mobileBar{display:flex;}
 }
@@ -241,7 +237,6 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 <!-- REVIEW MODAL -->
 <div class="ov rev-ov" id="revOv" style="display:none">
   <div class="rmo">
-    <div class="rmo-body">
     <div class="rmt">✓ Revisar datos extraídos</div>
     <div class="rmc" id="rmc"></div>
     <div class="rlay">
@@ -269,21 +264,18 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="rs">
       <div class="rst">Mangueras</div>
       <div class="tabs">
-        <button type="button" class="tab active" onclick="swTab(event,1)">Manguera 1</button>
-        <button type="button" class="tab" onclick="swTab(event,2)">Manguera 2</button>
-        <button type="button" class="tab" onclick="swTab(event,3)">Manguera 3</button>
+        <div class="tab active" onclick="swTab(1)">Manguera 1</div>
+        <div class="tab" onclick="swTab(2)">Manguera 2</div>
+        <div class="tab" onclick="swTab(3)">Manguera 3</div>
       </div>
       <div id="mp1" class="mp active"></div>
       <div id="mp2" class="mp"></div>
       <div id="mp3" class="mp"></div>
     </div>
-    </div><!-- /rmo-body -->
-    <div class="rmo-footer">
     <div class="rbtns">
       <button class="bsave" onclick="saveRev()">✓ Guardar registros</button>
       <button class="bskip" onclick="skipRev()">Omitir esta hoja</button>
     </div>
-    </div><!-- /rmo-footer -->
   </div>
 </div>
 
@@ -451,7 +443,14 @@ dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');}
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')));});
 function onFiles(e){addFiles([...e.target.files]);e.target.value='';}
-function addFiles(flist){flist.forEach(f=>{const r=new FileReader();r.onload=ev=>{files.push({b64:ev.target.result.split(',')[1],mime:f.type||'image/jpeg',name:f.name,url:ev.target.result,status:'pending'});renderQ();};r.readAsDataURL(f);});}
+function compressImage(file,maxPx,quality){return new Promise(resolve=>{const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);const b64full=c.toDataURL('image/jpeg',quality);resolve({b64:b64full.split(',')[1],mime:'image/jpeg',url:b64full});};img.src=ev.target.result;};r.readAsDataURL(file);});}
+function addFiles(flist){
+  [...flist].forEach(async f=>{
+    const comp=await compressImage(f,1600,0.82);
+    files.push({...comp,name:f.name,status:'pending'});
+    renderQ();
+  });
+}
 function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}"><img class="bith" src="${f.url}"><div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
 
 const PROMPT=`Eres un asistente que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":3,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""}]}. REGLAS DE INTERPRETACIÓN: diametro: formato 1/4" 3/8" 1/2" 5/8" 3/4" 1" etc. sae: el campo tiene casillas R2 y R12 — si la casilla R2 está marcada (X o palomita) devuelve exactamente "100R2AT"; si R12 está marcada devuelve exactamente "100R12"; si ninguna está marcada deja "". presion: el campo tiene casillas 3K 4K 5K 6K — la casilla marcada equivale a: 3K=3000, 4K=4000, 5K=5000, 6K=6000 — devuelve solo el número sin unidades. recubrimiento: el campo tiene casillas Ninguno, Antiflama, Acero — pueden estar marcadas una o varias; si Ninguno está marcada (o ninguna) deja ""; si solo Antiflama está marcada devuelve "ANTIFLAMA"; si solo Acero está marcada devuelve "ESPIRAL METÁLICO"; si ambas Antiflama y Acero están marcadas devuelve "ANTIFLAMA + ESPIRAL METÁLICO". longitud: solo el número. Cuadrantes vacíos o sin marcar dejar "".`;
@@ -467,24 +466,19 @@ async function runBatch(){
       const data=await resp.json();
       if(!resp.ok||data.error)throw new Error(data.error?.message||`HTTP ${resp.status}`);
       const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-      toast('RAW: '+raw.substring(0,80),'warn');
-      let parsed;
-      try{ parsed=JSON.parse(raw); }
-      catch(pe){ toast('JSON ERROR: '+pe.message+' | '+raw.substring(0,60),'err'); results.push(null); files[i].status='error'; renderQ(); continue; }
-      results.push({data:parsed,url:files[i].url});
+      results.push({data:JSON.parse(raw),url:files[i].url});
       files[i].status='done';
     }catch(e){
       files[i].status='error';files[i].err=e.message.substring(0,40);
-      results.push(null);toast('FETCH ERROR: '+e.message.substring(0,70),'err');
+      results.push(null);toast('Error al procesar imagen: '+e.message.substring(0,60),'err');
     }
     renderQ();
   }
-  toast('results validos: '+results.filter(Boolean).length+' de '+results.length,'warn');
-  await new Promise(r=>setTimeout(r,2000));
+  await new Promise(r=>setTimeout(r,400));
   closeScan();rIdx=0;nextReview();
 }
 
-function swTab(e,n){if(e){e.preventDefault();e.stopPropagation();}document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));document.querySelectorAll('.mp').forEach((p,i)=>p.classList.toggle('active',i===n-1));}
+function swTab(n){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));document.querySelectorAll('.mp').forEach((p,i)=>p.classList.toggle('active',i===n-1));}
 function fSel(id,val){if(!val)return;const el=document.getElementById(id);if(!el)return;const v=val.toLowerCase();const m=[...el.options].find(o=>o.value&&(o.value.toLowerCase()===v||v.includes(o.value.toLowerCase())));if(m){el.value=m.value;el.classList.add('sc');}}
 
 function nextReview(){
@@ -497,7 +491,7 @@ function nextReview(){
   const gm={empresa:'r_empresa',planta:'r_planta',subplanta:'r_subplanta',maquina:'r_maquina',equipo:'r_equipo',subequipo:'r_subequipo',tecnico:'r_tecnico',fecha_levantamiento:'r_fecha_lev'};
   Object.entries(gm).forEach(([k,id])=>{const el=document.getElementById(id);if(el){el.value=gen[k]||'';el.classList.toggle('sc',!!(gen[k]));}});
   (data.mangueras||[]).forEach((m,idx)=>{const n=idx+1;['ubicacion','presion','longitud','recubrimiento','conA','adaptA','conB','adaptB','comentarios'].forEach(f=>{const el=document.getElementById(`r${n}_${f}`);if(el){el.value=m[f]||'';el.classList.toggle('sc',!!(m[f]));} });fSel(`r${n}_diametro`,m.diametro);fSel(`r${n}_sae`,m.sae);});
-  swTab(null,1);document.getElementById('revOv').style.display='flex';
+  swTab(1);document.getElementById('revOv').style.display='flex';
 }
 
 function saveRev(){
