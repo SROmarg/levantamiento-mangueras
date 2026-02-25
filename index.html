@@ -427,7 +427,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="hero-stat"><strong id="heroSheets">0</strong><span>Formatos</span></div>
   </div>
   <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
-    <button class="hero-excel-btn" id="mbExcel" onclick="exportExcel()" disabled>⬇ Descargar Excel</button>
+    <button class="hero-excel-btn" id="heroExcel" onclick="shareExcel()" disabled>↗ Enviar por WhatsApp</button>
     <button class="hero-manual-btn" onclick="openManualMobile()">✎ Captura manual</button>
   </div>
 </div>
@@ -802,10 +802,10 @@ function addEntryMobile(){
 function updateHero(){
   const hc=document.getElementById('heroCount');
   const hs=document.getElementById('heroSheets');
-  const mb=document.getElementById('mbExcel');
+  const he=document.getElementById('heroExcel');
   if(hc) hc.textContent=records.length;
   if(hs) hs.textContent=scanCount;
-  if(mb) mb.disabled=!records.length;
+  if(he) he.disabled=!records.length;
 }
 
 function render(){
@@ -827,6 +827,32 @@ function cpDesc(id,btn){const r=records.find(x=>x.id===id);if(!r)return;navigato
 async function delRow(id){if(!await showConfirm('¿Eliminar este registro?'))return;records=records.filter(r=>r.id!==id);save();render();}
 async function clearAll(){if(!await showConfirm('¿Eliminar todos los registros? Esta acción no se puede deshacer.','Eliminar todo'))return;records=[];localStorage.removeItem(STOR);render();}
 function clearForm(){['planta','subplanta','maquina','equipo','ubicacion','presion','longitud','conA','adaptA','conB','adaptB','comentarios'].forEach(id=>document.getElementById(id).value='');['diametro','sae','recubrimiento'].forEach(id=>document.getElementById(id).value='');}
+async function shareExcel(){
+  if(!records.length)return;
+  const h=['FECHA','PLANTA','SUBPLANTA','MÁQUINA','EQUIPO','DONDE SE CONECTA','DIÁMETRO','SAE','PRESIÓN PSI','LONGITUD MM','RECUBRIMIENTO','CONECTOR A','ADAPTADOR A','CONECTOR B','ADAPTADOR B','COMENTARIOS','DESCRIPCIÓN DE MANGUERA'];
+  const rows=records.map(r=>[r.fecha,r.planta,r.subplanta,r.maquina,r.equipo,r.ubicacion,r.diametro,r.sae,Number(r.presion),Number(r.longitud),r.recubrimiento,r.conA,r.adaptA,r.conB,r.adaptB,r.comentarios,r.descripcion]);
+  const ws=XLSX.utils.aoa_to_sheet([h,...rows]);ws['!cols']=[10,14,14,16,18,16,9,10,11,11,14,26,20,26,20,28,100].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Levantamiento');
+  const filename=`Suminregio_Levantamiento_${new Date().toISOString().slice(0,10)}.xlsx`;
+  // Generar blob del archivo
+  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob=new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const file=new File([blob],filename,{type:blob.type});
+  // Web Share API con archivo
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file],title:'Levantamiento de Mangueras',text:`Suminregio Industrial — ${records.length} registro${records.length>1?'s':''} · ${new Date().toLocaleDateString('es-MX')}`});
+      toast('✓ Archivo compartido','ok');
+    }catch(e){
+      if(e.name!=='AbortError') toast('Error al compartir','err');
+    }
+  } else {
+    // Fallback: descarga normal si Web Share no disponible
+    XLSX.writeFile(wb,filename);
+    toast('✓ Excel descargado','ok');
+  }
+}
+
 function exportExcel(){
   if(!records.length)return;
   const h=['FECHA','PLANTA','SUBPLANTA','MÁQUINA','EQUIPO','DONDE SE CONECTA','DIÁMETRO','SAE','PRESIÓN PSI','LONGITUD MM','RECUBRIMIENTO','CONECTOR A','ADAPTADOR A','CONECTOR B','ADAPTADOR B','COMENTARIOS','DESCRIPCIÓN DE MANGUERA'];
