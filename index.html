@@ -593,6 +593,16 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 </div>
 
 <script>
+let confResolve=null;
+function showConfirm(msg,okLabel='Eliminar'){
+  return new Promise(resolve=>{
+    confResolve=(v)=>{document.getElementById('confOv').style.display='none';resolve(v);};
+    document.getElementById('confMsg').textContent=msg;
+    document.getElementById('confOkBtn').textContent=okLabel;
+    document.getElementById('confOv').style.display='flex';
+  });
+}
+
 const SUFFIX=`EL CONECTOR Y LA MANGUERA DEBEN SER PROPORCIONADOS POR EL MISMO PROVEEDOR. EL CRIMPADO ENTRE LA MANGUERA Y LAS CONEXIONES DEBERÁ SUJETARSE A LA NORMA SAE J516 O SU EQUIVALENTE EN NORMA EN. EL ENSAMBLE DEBERÁ TENER UN NÚMERO DE IDENTIFICACIÓN ÚNICO CORRELATIVO DEL PROVEEDOR SIN DEFORMARLO (NÚMERO DE ARTÍCULO; EN CASO DE NO TENER NÚMERO DE ARTÍCULO COLOCAR EL NÚMERO DE ORDEN DE TRABAJO) Y LA FECHA DE ENSAMBLE REALIZADOS CON LÁPIZ ELÉCTRICO. DEBERÁ VENIR ENSAMBLADA CON ACOPLES PERMANENTES Y NO SE DEBE PELAR LA MANGUERA PARA EL CRIMPADO. DEBERÁ ESTAR SECA Y LIMPIA EN SU INTERIOR ASÍ MISMO TENER EN AMBOS EXTREMOS TAPONES DE PLÁSTICO ROSCADOS PARA SU PROTECCIÓN Y SE DEBERÁ SUMINISTRAR DE FORMA INDIVIDUAL EN UNA BOLSA PLÁSTICA RESISTENTE.`;
 const STOR='suminregio_v5';
 let records=[],files=[],results=[],rIdx=0,scanCount=0;
@@ -631,7 +641,16 @@ function mpHTML(n){
 [1,2,3].forEach(n=>document.getElementById(`mp${n}`).innerHTML=mpHTML(n));
 
 // Scan
-function openScan(){files=[];document.getElementById('bq').innerHTML='';document.getElementById('bq').style.display='none';document.getElementById('bstart').disabled=true;document.getElementById('scanOv').style.display='flex';}
+function openScan(){
+  files=[];
+  document.getElementById('bq').innerHTML='';
+  document.getElementById('bq').style.display='none';
+  document.getElementById('bstart').disabled=true;
+  document.getElementById('progWrap').classList.remove('show');
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progPct').textContent='0%';
+  document.getElementById('scanOv').style.display='flex';
+}
 function closeScan(){document.getElementById('scanOv').style.display='none';files=[];}
 const dz=document.getElementById('dz');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
@@ -791,16 +810,6 @@ function exportExcel(){
 }
 function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3500);}
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')addEntry();});
-
-let confResolve=null;
-function showConfirm(msg,okLabel='Eliminar'){
-  return new Promise(resolve=>{
-    confResolve=(v)=>{document.getElementById('confOv').style.display='none';resolve(v);};
-    document.getElementById('confMsg').textContent=msg;
-    document.getElementById('confOkBtn').textContent=okLabel;
-    document.getElementById('confOv').style.display='flex';
-  });
-}
 
 checkKey();
 load();
