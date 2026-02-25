@@ -84,7 +84,8 @@ header{background:var(--dk);border-bottom:2px solid var(--y);padding:0 18px;heig
 .tab.active{background:var(--yd);border-color:var(--y);color:var(--y);}
 .mp{display:none;}
 .mp.active{display:block;}
-.rbtns{display:flex;gap:8px;margin-top:10px;}
+.rbtns{display:flex;gap:8px;margin-top:10px;padding-bottom:env(safe-area-inset-bottom,0px);}
+@media(max-width:700px){.rbtns{position:sticky;bottom:0;background:var(--dk);padding:10px 0 calc(10px + env(safe-area-inset-bottom,16px));margin-top:8px;}}
 .bsave{flex:1;background:var(--gn);color:var(--bk);border:none;border-radius:5px;padding:9px;font-family:var(--fc);font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer;}
 .bsave:hover{background:#16a34a;}
 .bskip{background:none;border:1px solid var(--br2);color:var(--mu);border-radius:5px;padding:9px 11px;font-size:10.5px;cursor:pointer;}
@@ -264,9 +265,9 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="rs">
       <div class="rst">Mangueras</div>
       <div class="tabs">
-        <div class="tab active" onclick="swTab(1)">Manguera 1</div>
-        <div class="tab" onclick="swTab(2)">Manguera 2</div>
-        <div class="tab" onclick="swTab(3)">Manguera 3</div>
+        <div class="tab active" onclick="swTab(1)"><span>Manguera&nbsp;1</span></div>
+        <div class="tab" onclick="swTab(2)"><span>Manguera&nbsp;2</span></div>
+        <div class="tab" onclick="swTab(3)"><span>Manguera&nbsp;3</span></div>
       </div>
       <div id="mp1" class="mp active"></div>
       <div id="mp2" class="mp"></div>
