@@ -690,19 +690,14 @@ async function runBatch(){
     for(let attempt=1;attempt<=3;attempt++){
       try{
         if(attempt>1){
-          const wait=attempt*6000;
+          const wait=attempt*8000;
           document.getElementById('progText').textContent=`Reintentando ${attempt}/3 — espera ${wait/1000}s...`;
           await new Promise(r=>setTimeout(r,wait));
         }
-        document.getElementById('progText').textContent=`Analizando ${i+1} de ${files.length}${attempt>1?' (intento '+attempt+')':''}...`;
-        const model=attempt<3?'claude-haiku-4-5-20251001':'claude-sonnet-4-20250514';
-        const resp=await fetch(PROXY_URL+"/api/scan",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:files[i].mime,data:files[i].b64}},{type:"text",text:PROMPT}]}]})});
+        const resp=await fetch(PROXY_URL+"/api/scan",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:files[i].mime,data:files[i].b64}},{type:"text",text:PROMPT}]}]})});
         const data=await resp.json();
-        const isOverloaded=data.error?.type==='overloaded_error'||data.error?.message?.includes('overloaded')||resp.status===529||resp.status===503;
-        if(isOverloaded){
-          if(attempt<3)continue;
-          throw new Error('Servidor sobrecargado. Intenta en unos minutos.');
-        }
+        const isOverloaded=data.error?.type==='overloaded_error'||resp.status===529||resp.status===503;
+        if(isOverloaded&&attempt<3)continue;
         if(!resp.ok||data.error)throw new Error(data.error?.message||`HTTP ${resp.status}`);
         const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
         results.push({data:JSON.parse(raw),url:files[i].url});
@@ -711,10 +706,8 @@ async function runBatch(){
         break;
       }catch(e){
         if(attempt===3){
-          files[i].status='error';
-          files[i].err=e.message.substring(0,50);
-          results.push(null);
-          toast('⚠ '+e.message.substring(0,70),'err');
+          files[i].status='error';files[i].err=e.message.substring(0,40);
+          results.push(null);toast('Error: '+e.message.substring(0,60),'err');
         }
       }
     }
@@ -732,17 +725,7 @@ function fSel(id,val){if(!val)return;const el=document.getElementById(id);if(!el
 
 function nextReview(){
   while(rIdx<results.length&&!results[rIdx])rIdx++;
-  if(rIdx>=results.length){
-    document.getElementById('revOv').style.display='none';
-    const valid=results.filter(Boolean).length;
-    const total=results.length;
-    if(valid===0){
-      toast(`⚠ No se pudo procesar ningún formato. Intenta de nuevo.`,'err');
-    } else {
-      toast(`✓ ${valid} de ${total} formato${total>1?'s':''} procesado${total>1?'s':''}${valid<total?' (algunos con error)':''}`, valid<total?'warn':'ok');
-    }
-    return;
-  }
+  if(rIdx>=results.length){document.getElementById('revOv').style.display='none';toast('✓ Todos los formatos procesados','ok');return;}
   const tot=results.filter(Boolean).length,done=results.slice(0,rIdx).filter(Boolean).length;
   document.getElementById('rmc').textContent=`Hoja ${done+1} de ${tot}`;
   document.getElementById('rimg').src=results[rIdx].url;
