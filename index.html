@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="format-detection" content="telephone=no, address=no, email=no">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="productos_mangueras.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -309,6 +310,58 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 .conf-ok{flex:1;background:var(--rd);color:white;border:none;border-radius:var(--radius);padding:9px;font-family:var(--fc);font-size:12px;font-weight:800;cursor:pointer;transition:all var(--transition);}
 .conf-ok:hover{background:#dc2626;}
 
+/* PRODUCT SUGGESTIONS */
+.ps-wrap{margin-top:10px;border:1px solid var(--br);border-radius:var(--radius);overflow:hidden;}
+.ps-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--dk2);cursor:pointer;user-select:none;}
+.ps-hdr span{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--gn);text-transform:uppercase;}
+.ps-hdr .ps-arrow{color:var(--mu);font-size:10px;transition:transform 0.2s;}
+.ps-hdr.open .ps-arrow{transform:rotate(180deg);}
+.ps-body{display:none;padding:6px;}
+.ps-body.open{display:block;}
+.ps-empty{color:var(--mu);font-size:11px;padding:8px;text-align:center;}
+.ps-cat{font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.8px;padding:6px 4px 3px;font-family:var(--fc);}
+.ps-item{background:var(--dk3);border:1px solid var(--br);border-radius:4px;padding:7px 8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:flex-start;gap:6px;}
+.ps-info{flex:1;min-width:0;}
+.ps-sku{font-family:var(--fc);font-size:10px;font-weight:700;color:var(--y);letter-spacing:0.3px;}
+.ps-name{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.ps-meta{font-size:9px;color:var(--mu);margin-top:2px;}
+.ps-meta .ps-price{color:var(--gn);font-weight:600;}
+.ps-meta .ps-stock{margin-left:6px;}
+.ps-copy{background:none;border:1px solid var(--br2);color:var(--mu2);border-radius:3px;padding:3px 7px;font-size:9px;cursor:pointer;white-space:nowrap;font-family:var(--fn);}
+.ps-copy:active{background:var(--y);color:var(--bk);border-color:var(--y);}
+.ps-add{background:var(--y);color:var(--bk);border:none;border-radius:3px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fc);white-space:nowrap;min-width:28px;}
+.ps-add:active{opacity:0.7;}
+.ps-add.added{background:var(--gn);color:white;}
+.ps-btns{display:flex;flex-direction:column;gap:3px;align-items:flex-end;}
+.ps-loading{text-align:center;padding:12px;color:var(--mu);font-size:11px;}
+
+/* COTIZACIÓN SECTION */
+.cot-section{margin-top:16px;border-top:2px solid var(--y);padding-top:16px;}
+.cot-title{font-family:var(--fc);font-size:16px;font-weight:800;color:var(--y);letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.cot-badge{background:var(--y);color:var(--bk);font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;font-family:var(--fc);}
+.cot-empty{color:var(--mu);font-size:11px;text-align:center;padding:20px 10px;}
+.cot-item{background:var(--dk2);border:1px solid var(--br);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.cot-item-info{flex:1;min-width:0;}
+.cot-item-sku{font-family:var(--fc);font-size:11px;font-weight:700;color:var(--y);}
+.cot-item-name{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cot-item-price{font-size:11px;color:var(--gn);font-weight:600;font-family:var(--fc);}
+.cot-item-ctx{font-size:9px;color:var(--mu);margin-top:1px;}
+.cot-qty{width:48px;text-align:center;background:var(--dk3);border:1px solid var(--br2);color:var(--w);border-radius:3px;padding:4px;font-size:12px;font-family:var(--fc);}
+.cot-rm{background:none;border:none;color:var(--mu2);font-size:14px;cursor:pointer;padding:2px 6px;}
+.cot-rm:hover{color:var(--rd);}
+.cot-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--br);margin-top:8px;font-family:var(--fc);}
+.cot-total-label{font-size:12px;color:var(--tx2);font-weight:600;}
+.cot-total-val{font-size:18px;color:var(--gn);font-weight:800;}
+.cot-actions{display:flex;gap:8px;margin-top:10px;}
+.cot-btn{flex:1;padding:10px;border:none;border-radius:var(--radius);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.3px;}
+.cot-btn-xl{background:var(--y);color:var(--bk);}
+.cot-btn-xl:active{opacity:0.8;}
+.cot-btn-wa{background:#25D366;color:white;}
+.cot-btn-wa:active{opacity:0.8;}
+.cot-btn:disabled{opacity:0.4;cursor:default;}
+.cot-client{display:flex;gap:6px;margin-bottom:10px;}
+.cot-client input{flex:1;background:var(--dk3);border:1px solid var(--br);color:var(--w);padding:7px 10px;border-radius:var(--radius);font-size:12px;font-family:var(--fn);}
+
 </style>
 </head>
 <body>
@@ -447,7 +500,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="fg c1"><div><label>Donde se conecta</label><input type="text" id="m_ubicacion" placeholder="Ej: SALIDA B"></div></div>
     <div class="sec"><div class="sn">2</div><div class="sl">Manguera</div><div class="sl2"></div></div>
     <div class="fg c1"><div><label>Diámetro</label><select id="m_diametro"><option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option></select></div></div>
-    <div class="fg c1"><div><label>Tipo SAE</label><select id="m_sae"><option value="">--</option><option>100R2AT</option><option>100R12</option></select></div></div>
+    <div class="fg c1"><div><label>Tipo SAE</label><select id="m_sae"><option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option></select></div></div>
     <div class="fg c1"><div><label>Presión (PSI)</label><select id="m_presion"><option value="">--</option><option value="3000">3K — 3000 PSI</option><option value="4000">4K — 4000 PSI</option><option value="5000">5K — 5000 PSI</option><option value="6000">6K — 6000 PSI</option></select></div></div>
     <div class="fg c1"><div><label>Longitud (MM)</label><input type="number" id="m_longitud" placeholder="570"></div></div>
     <div class="fg c1"><div><label>Recubrimiento</label><input type="text" id="m_recubrimiento" placeholder="ANTIFLAMA"></div></div>
@@ -512,7 +565,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
           <div class="sec"><div class="sn">2</div><div class="sl">Manguera</div><div class="sl2"></div></div>
           <div class="fg c3">
             <div><label>Diámetro</label><select id="diametro"><option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option></select></div>
-            <div><label>Tipo SAE</label><select id="sae"><option value="">--</option><option>100R2AT</option><option>100R12</option></select></div>
+            <div><label>Tipo SAE</label><select id="sae"><option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option></select></div>
             <div><label>Presión (PSI)</label>
               <select id="presion">
                 <option value="">--</option>
@@ -573,6 +626,25 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
       </table>
     </div>
   </div>
+
+  <!-- COTIZACIÓN -->
+  <div class="cot-section" id="cotSection" style="display:none">
+    <div class="cot-title">COTIZACIÓN <span class="cot-badge" id="cotBadge">0</span></div>
+    <div class="cot-client">
+      <input type="text" id="cotCliente" placeholder="Nombre del cliente">
+      <input type="text" id="cotPlanta" placeholder="Planta / Ubicación">
+    </div>
+    <div id="cotItems"></div>
+    <div class="cot-total">
+      <span class="cot-total-label">TOTAL</span>
+      <span class="cot-total-val" id="cotTotal">$0.00</span>
+    </div>
+    <div class="cot-actions">
+      <button class="cot-btn cot-btn-xl" onclick="exportCotizacion()">⬇ Excel Cotización</button>
+      <button class="cot-btn cot-btn-wa" onclick="shareCotizacion()">↗ Compartir</button>
+    </div>
+  </div>
+
 </div>
 <div class="toast" id="toast"></div>
 
@@ -626,9 +698,199 @@ function desc(r){const tA=r.adaptA?`${r.conA} CON ADAPTADOR ${r.adaptA}`:r.conA;
 function mpHTML(n){
   const ds=`<option value="">--</option><option>1/4"</option><option>3/8"</option><option>1/2"</option><option>5/8"</option><option>3/4"</option><option>1"</option><option>1 1/4"</option><option>1 1/2"</option><option>2"</option>`;
   const ss=`<option value="">--</option><option>100R1AT</option><option>100R2AT</option><option>100R12</option><option>100R13</option><option>100R15</option><option>100R17</option>`;
-  return `<div class="rg c1" style="margin-bottom:3px"><div class="rf"><label>Donde se conecta</label><input type="text" id="r${n}_ubicacion"></div></div><div class="rg c3" style="margin-bottom:3px"><div class="rf"><label>Diámetro</label><select id="r${n}_diametro">${ds}</select></div><div class="rf"><label>SAE</label><select id="r${n}_sae">${ss}</select></div><div class="rf"><label>Presión</label><input type="number" id="r${n}_presion"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Longitud (MM)</label><input type="number" id="r${n}_longitud"></div><div class="rf"><label>Recubrimiento</label><input type="text" id="r${n}_recubrimiento"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector A</label><input type="text" id="r${n}_conA"></div><div class="rf"><label>Adaptador A</label><input type="text" id="r${n}_adaptA"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector B</label><input type="text" id="r${n}_conB"></div><div class="rf"><label>Adaptador B</label><input type="text" id="r${n}_adaptB"></div></div><div class="rg c1"><div class="rf"><label>Comentarios</label><input type="text" id="r${n}_comentarios"></div></div>`;
+  return `<div class="rg c1" style="margin-bottom:3px"><div class="rf"><label>Donde se conecta</label><input type="text" id="r${n}_ubicacion"></div></div><div class="rg c3" style="margin-bottom:3px"><div class="rf"><label>Diámetro</label><select id="r${n}_diametro">${ds}</select></div><div class="rf"><label>SAE</label><select id="r${n}_sae">${ss}</select></div><div class="rf"><label>Presión</label><input type="number" id="r${n}_presion"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Longitud (MM)</label><input type="number" id="r${n}_longitud"></div><div class="rf"><label>Recubrimiento</label><input type="text" id="r${n}_recubrimiento"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector A</label><input type="text" id="r${n}_conA"></div><div class="rf"><label>Adaptador A</label><input type="text" id="r${n}_adaptA"></div></div><div class="rg" style="margin-bottom:3px"><div class="rf"><label>Conector B</label><input type="text" id="r${n}_conB"></div><div class="rf"><label>Adaptador B</label><input type="text" id="r${n}_adaptB"></div></div><div class="rg c1"><div class="rf"><label>Comentarios</label><input type="text" id="r${n}_comentarios"></div></div><div id="ps_${n}"></div>`;
 }
 [1,2,3].forEach(n=>document.getElementById(`mp${n}`).innerHTML=mpHTML(n));
+
+// PRODUCT MATCHING
+function normDiam(d){return (d||'').replace(/\s/g,'').replace(/["″]/g,'"').toLowerCase();}
+function matchProducts(specs){
+  if(typeof PRODUCTOS_MANGUERAS==='undefined')return{m:[],c:[],a:[]};
+  const dm=normDiam(specs.diametro);
+  const sae=(specs.sae||'').toUpperCase();
+  const pr=parseInt(specs.presion)||0;
+  const conAu=(specs.conA||'').toUpperCase();
+  const conBu=(specs.conB||'').toUpperCase();
+  // Match mangueras
+  let mHits=PRODUCTOS_MANGUERAS.m.filter(m=>{
+    if(dm&&m.dm&&normDiam(m.dm)!==dm)return false;
+    if(sae&&m.sa&&m.sa!==sae)return false;
+    return true;
+  }).map(m=>{
+    let sc=0;
+    if(dm&&m.dm&&normDiam(m.dm)===dm)sc+=3;
+    if(sae&&m.sa===sae)sc+=3;
+    if(pr&&m.pr&&m.pr>=pr)sc+=2;
+    if(m.st>0)sc+=1;
+    return{...m,_sc:sc};
+  }).sort((a,b)=>b._sc-a._sc||(b.st||0)-(a.st||0)).slice(0,6);
+  // Match conectores by type found in conA/conB
+  const connTypes=new Set();
+  ['JIC','ORB','ORFS','NPT','BRIDA','BSP','BANJO','CAMLOCK'].forEach(t=>{
+    if(conAu.includes(t)||conBu.includes(t))connTypes.add(t);
+  });
+  let cHits=[];
+  if(connTypes.size){
+    cHits=PRODUCTOS_MANGUERAS.c.filter(c=>{
+      if(!c.tp)return false;
+      if(!c.tp.some(t=>connTypes.has(t)))return false;
+      if(dm&&c.dm&&normDiam(c.dm)===dm)return true;
+      if(!dm)return true;
+      return false;
+    }).sort((a,b)=>(b.st||0)-(a.st||0)).slice(0,6);
+  }
+  // Match adaptadores
+  let aHits=[];
+  if(connTypes.size){
+    aHits=PRODUCTOS_MANGUERAS.a.filter(a=>{
+      if(!a.tp)return false;
+      return a.tp.some(t=>connTypes.has(t));
+    }).sort((a,b)=>(b.st||0)-(a.st||0)).slice(0,4);
+  }
+  return{m:mHits,c:cHits,a:aHits};
+}
+function renderSuggestions(n){
+  const container=document.getElementById(`ps_${n}`);
+  if(!container)return;
+  const rv=id=>document.getElementById(id)?.value.trim()||'';
+  const d=rv(`r${n}_diametro`),s=rv(`r${n}_sae`),p=rv(`r${n}_presion`);
+  if(!d&&!s){container.innerHTML='';return;}
+  const specs={diametro:d,sae:s,presion:p,conA:rv(`r${n}_conA`),conB:rv(`r${n}_conB`)};
+  const res=matchProducts(specs);
+  if(!res.m.length&&!res.c.length){container.innerHTML='';return;}
+  let html='<div class="ps-wrap"><div class="ps-hdr" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\')"><span>⚡ Productos sugeridos</span><span class="ps-arrow">▼</span></div><div class="ps-body">';
+  const esc=s=>(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  if(res.m.length){
+    html+='<div class="ps-cat">Mangueras</div>';
+    res.m.forEach(m=>{
+      html+=`<div class="ps-item"><div class="ps-info"><div class="ps-sku">${m.s||'—'}</div><div class="ps-name">${m.n}</div><div class="ps-meta"><span class="ps-price">$${(m.$||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</span><span class="ps-stock">Stock: ${m.st||0}</span></div></div><div class="ps-btns"><button class="ps-add" onclick="addToCot('${esc(m.s)}','${esc(m.n)}',${m.$||0},'Manguera ${specs.diametro} ${specs.sae}');this.textContent='✓';this.classList.add('added')">+</button><button class="ps-copy" onclick="navigator.clipboard.writeText('${esc(m.s)}');this.textContent='✓';setTimeout(()=>this.textContent='SKU',1500)">SKU</button></div></div>`;
+    });
+  }
+  if(res.c.length){
+    html+='<div class="ps-cat">Conectores</div>';
+    res.c.forEach(c=>{
+      html+=`<div class="ps-item"><div class="ps-info"><div class="ps-sku">${c.s||'—'}</div><div class="ps-name">${c.n}</div><div class="ps-meta"><span class="ps-price">$${(c.$||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</span><span class="ps-stock">Stock: ${c.st||0}</span></div></div><div class="ps-btns"><button class="ps-add" onclick="addToCot('${esc(c.s)}','${esc(c.n)}',${c.$||0},'Conector');this.textContent='✓';this.classList.add('added')">+</button><button class="ps-copy" onclick="navigator.clipboard.writeText('${esc(c.s)}');this.textContent='✓';setTimeout(()=>this.textContent='SKU',1500)">SKU</button></div></div>`;
+    });
+  }
+  if(res.a.length){
+    html+='<div class="ps-cat">Adaptadores</div>';
+    res.a.forEach(a=>{
+      html+=`<div class="ps-item"><div class="ps-info"><div class="ps-sku">${a.s||'—'}</div><div class="ps-name">${a.n}</div><div class="ps-meta"><span class="ps-price">$${(a.$||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div></div><div class="ps-btns"><button class="ps-add" onclick="addToCot('${esc(a.s)}','${esc(a.n)}',${a.$||0},'Adaptador');this.textContent='✓';this.classList.add('added')">+</button><button class="ps-copy" onclick="navigator.clipboard.writeText('${esc(a.s)}');this.textContent='✓';setTimeout(()=>this.textContent='SKU',1500)">SKU</button></div></div>`;
+    });
+  }
+  html+='</div></div>';
+  container.innerHTML=html;
+}
+// Auto-trigger suggestions when fields change in review
+function setupSuggestionTriggers(){
+  [1,2,3].forEach(n=>{
+    ['diametro','sae','presion','conA','conB'].forEach(f=>{
+      const el=document.getElementById(`r${n}_${f}`);
+      if(el)el.addEventListener('change',()=>renderSuggestions(n));
+      if(el&&el.tagName==='INPUT')el.addEventListener('input',()=>{clearTimeout(el._st);el._st=setTimeout(()=>renderSuggestions(n),500);});
+    });
+  });
+}
+setTimeout(setupSuggestionTriggers,200);
+
+// COTIZACIÓN CART
+let cotCart=[];
+function addToCot(sku,name,price,ctx){
+  const existing=cotCart.find(c=>c.sku===sku);
+  if(existing){existing.qty++;renderCot();toast('✓ Cantidad actualizada','ok');return;}
+  cotCart.push({sku,name,price:parseFloat(price)||0,qty:1,ctx:ctx||''});
+  renderCot();
+  toast('✓ Agregado a cotización','ok');
+}
+function rmFromCot(idx){cotCart.splice(idx,1);renderCot();}
+function updateCotQty(idx,val){const q=parseFloat(val);if(q>0)cotCart[idx].qty=q;renderCot();}
+function renderCot(){
+  const sec=document.getElementById('cotSection');
+  const items=document.getElementById('cotItems');
+  const badge=document.getElementById('cotBadge');
+  const total=document.getElementById('cotTotal');
+  if(!cotCart.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  badge.textContent=cotCart.length;
+  let html='';
+  let sum=0;
+  cotCart.forEach((c,i)=>{
+    const sub=c.price*c.qty;
+    sum+=sub;
+    html+=`<div class="cot-item">
+      <div class="cot-item-info">
+        <div class="cot-item-sku">${c.sku}</div>
+        <div class="cot-item-name">${c.name}</div>
+        ${c.ctx?`<div class="cot-item-ctx">${c.ctx}</div>`:''}
+      </div>
+      <div class="cot-item-price">$${c.price.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+      <input type="number" class="cot-qty" value="${c.qty}" min="1" step="0.5" onchange="updateCotQty(${i},this.value)">
+      <button class="cot-rm" onclick="rmFromCot(${i})">✕</button>
+    </div>`;
+  });
+  items.innerHTML=html;
+  total.textContent='$'+sum.toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+function exportCotizacion(){
+  if(!cotCart.length)return;
+  const cliente=document.getElementById('cotCliente').value.trim()||'';
+  const planta=document.getElementById('cotPlanta').value.trim()||'';
+  const fecha=new Date().toLocaleDateString('es-MX');
+  const h=[['COTIZACIÓN — SUMINREGIO INDUSTRIAL'],[''],
+    ['Cliente:',cliente,'','Planta:',planta],
+    ['Fecha:',fecha],[''],
+    ['#','SKU','DESCRIPCIÓN','P.UNIT','CANT','UNIDAD','SUBTOTAL']];
+  let sum=0;
+  cotCart.forEach((c,i)=>{
+    const sub=c.price*c.qty;sum+=sub;
+    h.push([i+1,c.sku,c.name,c.price,c.qty,'PZA/MTS',sub]);
+  });
+  h.push([]);
+  h.push(['','','','','','SUBTOTAL:',sum]);
+  h.push(['','','','','','IVA 16%:',sum*0.16]);
+  h.push(['','','','','','TOTAL:',sum*1.16]);
+  const ws=XLSX.utils.aoa_to_sheet(h);
+  ws['!cols']=[{wch:4},{wch:22},{wch:45},{wch:12},{wch:8},{wch:10},{wch:14}];
+  // Format currency columns
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  for(let r=6;r<=range.e.r;r++){
+    ['D','G'].forEach(col=>{
+      const addr=col+(r+1);
+      if(ws[addr]&&typeof ws[addr].v==='number'){ws[addr].z='$#,##0.00';}
+    });
+  }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Cotización');
+  const fn=`Cotizacion_${cliente.replace(/\s+/g,'_')||'Suminregio'}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb,fn);
+  toast('✓ Cotización descargada','ok');
+}
+async function shareCotizacion(){
+  if(!cotCart.length)return;
+  const cliente=document.getElementById('cotCliente').value.trim()||'Cliente';
+  const fecha=new Date().toLocaleDateString('es-MX');
+  // Try sharing as Excel file
+  const h=[['COTIZACIÓN — SUMINREGIO INDUSTRIAL'],[''],['Cliente:',cliente],['Fecha:',fecha],[''],
+    ['#','SKU','DESCRIPCIÓN','P.UNIT','CANT','SUBTOTAL']];
+  let sum=0;
+  cotCart.forEach((c,i)=>{const sub=c.price*c.qty;sum+=sub;h.push([i+1,c.sku,c.name,c.price,c.qty,sub]);});
+  h.push([]);h.push(['','','','','SUBTOTAL:',sum]);h.push(['','','','','IVA 16%:',sum*0.16]);h.push(['','','','','TOTAL:',sum*1.16]);
+  const ws=XLSX.utils.aoa_to_sheet(h);ws['!cols']=[{wch:4},{wch:20},{wch:40},{wch:12},{wch:6},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Cotización');
+  const fn=`Cotizacion_${cliente.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob=new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const file=new File([blob],fn,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file],title:`Cotización ${cliente}`,
+        text:`Suminregio Industrial — Cotización ${cliente} · ${cotCart.length} artículo${cotCart.length>1?'s':''} · ${fecha}`});
+      toast('✓ Cotización compartida','ok');
+    }catch(e){if(e.name!=='AbortError')toast('Error al compartir','err');}
+  } else {
+    XLSX.writeFile(wb,fn);toast('✓ Cotización descargada','ok');
+  }
+}
 
 // Scan
 function openScan(){
@@ -663,7 +925,7 @@ function addFiles(flist){
 }
 function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}"><img class="bith" src="${f.url}"><div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
 
-const PROMPT=`Eres un asistente que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":3,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""}]}. REGLAS DE INTERPRETACIÓN: diametro: formato 1/4" 3/8" 1/2" 5/8" 3/4" 1" etc. sae: el campo tiene casillas R2 y R12 — si la casilla R2 está marcada (X o palomita) devuelve exactamente "100R2AT"; si R12 está marcada devuelve exactamente "100R12"; si ninguna está marcada deja "". presion: el campo tiene casillas 3K 4K 5K 6K — la casilla marcada equivale a: 3K=3000, 4K=4000, 5K=5000, 6K=6000 — devuelve solo el número sin unidades. recubrimiento: el campo tiene casillas Ninguno, Antiflama, Acero — pueden estar marcadas una o varias; si Ninguno está marcada (o ninguna) deja ""; si solo Antiflama está marcada devuelve "ANTIFLAMA"; si solo Acero está marcada devuelve "ESPIRAL METÁLICO"; si ambas Antiflama y Acero están marcadas devuelve "ANTIFLAMA + ESPIRAL METÁLICO". longitud: solo el número. Cuadrantes vacíos o sin marcar dejar "".`;
+const PROMPT=`Eres un asistente experto que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,...},{"numero":3,...}]}. REGLAS DE INTERPRETACIÓN — diametro: formato fraccional con comillas, ej: 1/4" 3/8" 1/2" 5/8" 3/4" 1" 1-1/4" 1-1/2" 2". — sae: el campo puede tener casillas R1AT, R2, R2AT, R12, R13, R15, R17. Mapeo: R1AT o R1→"100R1AT", R2 o R2AT→"100R2AT", R12→"100R12", R13→"100R13", R15→"100R15", R17→"100R17". Si el valor está escrito a mano (no casilla), interpretar: "R2"→"100R2AT", "2AT"→"100R2AT", "R12"→"100R12", etc. Si ninguna marcada ni escrita, dejar "". — presion: casillas 3K 4K 5K 6K equivalen a 3000, 4000, 5000, 6000. Si hay otro valor escrito a mano (ej: "2500", "5800"), devolver ese número. Solo el número, sin unidades. — recubrimiento: casillas Ninguno, Antiflama, Acero. Ninguno o vacío→"". Solo Antiflama→"ANTIFLAMA". Solo Acero→"ESPIRAL METÁLICO". Ambas→"ANTIFLAMA + ESPIRAL METÁLICO". Si hay texto adicional escrito, incluirlo. — longitud: solo el número en milímetros. — conA y conB (conectores): extraer TIPO + TAMAÑO + ÁNGULO. Tipos comunes: JIC, ORB, ORFS, NPT, BRIDA, SAE, BSP, METRIC, BANJO, CAM LOCK. Tamaños: fracciones (1/4", 1/2") o métricos (M14x1.5, M20). Ángulos: RECTO, 45°, 90°. Formato de salida: "TIPO TAMAÑO ÁNGULO" ej: "JIC 1/2 HEMBRA RECTO", "ORB 3/4 MACHO 90°", "BRIDA SAE 1". Si no se identifica el tipo, transcribir el texto tal como está escrito. — adaptA y adaptB: transcribir tal cual. Ej: "BRIDA 3/4 RECTA", "JIC 1/2 90°". — ROBUSTEZ: las casillas pueden estar marcadas con X, ✓, palomita, círculo relleno o cualquier marca — todas cuentan como "marcada". Si un cuadrante está completamente vacío o ilegible, devolver todos los campos de esa manguera como "". Si un campo individual es ilegible, devolver "". NO inventar datos — si no se lee claro, dejar "".`;
 
 async function runBatch(){
   if(!files.length)return;
@@ -748,6 +1010,8 @@ function nextReview(){
   Object.entries(gm).forEach(([k,id])=>{const el=document.getElementById(id);if(el){el.value=gen[k]||'';el.classList.toggle('sc',!!(gen[k]));}});
   (data.mangueras||[]).forEach((m,idx)=>{const n=idx+1;['ubicacion','presion','longitud','recubrimiento','conA','adaptA','conB','adaptB','comentarios'].forEach(f=>{const el=document.getElementById(`r${n}_${f}`);if(el){el.value=m[f]||'';el.classList.toggle('sc',!!(m[f]));} });fSel(`r${n}_diametro`,m.diametro);fSel(`r${n}_sae`,m.sae);});
   swTab(1);document.getElementById('revOv').style.display='flex';
+  // Trigger product suggestions for each hose with data
+  setTimeout(()=>{[1,2,3].forEach(n=>renderSuggestions(n));},100);
 }
 
 function saveRev(){
