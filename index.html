@@ -375,7 +375,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
       <div class="dzi">📎</div>
       <p><strong>Haz clic para seleccionar</strong><br>o arrastra las imágenes aquí</p>
     </div>
-    <input type="file" id="fbi" accept="image/*" capture="environment" multiple onchange="onFiles(event)">
+    <input type="file" id="fbi" accept="image/*,application/pdf" capture="environment" multiple onchange="onFiles(event)">
     <div class="dz-cam-row">
       <button class="dz-cam-btn" onclick="document.getElementById('fbi').click()">📷 Cámara</button>
       <button class="dz-file-btn" onclick="triggerFileOnly()">🗂 Archivo</button>
@@ -907,7 +907,7 @@ function closeScan(){document.getElementById('scanOv').style.display='none';file
 const dz=document.getElementById('dz');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')));});
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')||f.type==='application/pdf'));});
 function onFiles(e){addFiles([...e.target.files]);e.target.value='';}
 function triggerFileOnly(){
   const fi=document.getElementById('fbi');
@@ -916,14 +916,15 @@ function triggerFileOnly(){
   setTimeout(()=>fi.setAttribute('capture','environment'),1000);
 }
 function compressImage(file,maxPx,quality){return new Promise(resolve=>{const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);const b64full=c.toDataURL('image/jpeg',quality);resolve({b64:b64full.split(',')[1],mime:'image/jpeg',url:b64full});};img.src=ev.target.result;};r.readAsDataURL(file);});}
+function readPdf(file){return new Promise(resolve=>{const r=new FileReader();r.onload=ev=>{const b64full=ev.target.result;resolve({b64:b64full.split(',')[1],mime:'application/pdf',url:b64full,isPdf:true});};r.readAsDataURL(file);});}
 function addFiles(flist){
   [...flist].forEach(async f=>{
-    const comp=await compressImage(f,1600,0.82);
+    const comp=f.type==='application/pdf'?await readPdf(f):await compressImage(f,1600,0.82);
     files.push({...comp,name:f.name,status:'pending'});
     renderQ();
   });
 }
-function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}"><img class="bith" src="${f.url}"><div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
+function renderQ(){const q=document.getElementById('bq');q.style.display=files.length?'flex':'none';document.getElementById('bstart').disabled=!files.length;q.innerHTML=files.map((f,i)=>`<div class="bi ${f.status}">${f.isPdf?`<div class="bith" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);font-size:10px;font-weight:800;color:var(--ac)">PDF</div>`:`<img class="bith" src="${f.url}">`}<div class="bii"><div class="bin">${f.name}</div><div class="bis ${f.status}">${f.status==='pending'?'En espera — extraerá hasta 3 mangueras':f.status==='processing'?'Analizando...':f.status==='done'?'✓ Listo':'⚠ '+(f.err||'Error')}</div></div>${f.status==='pending'?`<button class="birm" onclick="files.splice(${i},1);renderQ()">✕</button>`:''}</div>`).join('');}
 
 const PROMPT=`Eres un asistente experto que lee formatos físicos de levantamiento de mangueras hidráulicas llenados a mano. El formato tiene 4 CUADRANTES: superior izquierdo = datos generales, superior derecho = Manguera 1, inferior izquierdo = Manguera 2, inferior derecho = Manguera 3. Responde ÚNICAMENTE con JSON sin markdown: {"generales":{"empresa":"","planta":"","subplanta":"","maquina":"","equipo":"","subequipo":"","tecnico":"","fecha_levantamiento":""},"mangueras":[{"numero":1,"ubicacion":"","diametro":"","sae":"","presion":"","longitud":"","recubrimiento":"","conA":"","adaptA":"","conB":"","adaptB":"","comentarios":""},{"numero":2,...},{"numero":3,...}]}. REGLAS DE INTERPRETACIÓN — diametro: formato fraccional con comillas, ej: 1/4" 3/8" 1/2" 5/8" 3/4" 1" 1-1/4" 1-1/2" 2". — sae: el campo puede tener casillas R1AT, R2, R2AT, R12, R13, R15, R17. Mapeo: R1AT o R1→"100R1AT", R2 o R2AT→"100R2AT", R12→"100R12", R13→"100R13", R15→"100R15", R17→"100R17". Si el valor está escrito a mano (no casilla), interpretar: "R2"→"100R2AT", "2AT"→"100R2AT", "R12"→"100R12", etc. Si ninguna marcada ni escrita, dejar "". — presion: casillas 3K 4K 5K 6K equivalen a 3000, 4000, 5000, 6000. Si hay otro valor escrito a mano (ej: "2500", "5800"), devolver ese número. Solo el número, sin unidades. — recubrimiento: casillas Ninguno, Antiflama, Acero. Ninguno o vacío→"". Solo Antiflama→"ANTIFLAMA". Solo Acero→"ESPIRAL METÁLICO". Ambas→"ANTIFLAMA + ESPIRAL METÁLICO". Si hay texto adicional escrito, incluirlo. — longitud: solo el número en milímetros. — conA y conB (conectores): extraer TIPO + TAMAÑO + ÁNGULO. Tipos comunes: JIC, ORB, ORFS, NPT, BRIDA, SAE, BSP, METRIC, BANJO, CAM LOCK. Tamaños: fracciones (1/4", 1/2") o métricos (M14x1.5, M20). Ángulos: RECTO, 45°, 90°. Formato de salida: "TIPO TAMAÑO ÁNGULO" ej: "JIC 1/2 HEMBRA RECTO", "ORB 3/4 MACHO 90°", "BRIDA SAE 1". Si no se identifica el tipo, transcribir el texto tal como está escrito. — adaptA y adaptB: transcribir tal cual. Ej: "BRIDA 3/4 RECTA", "JIC 1/2 90°". — ROBUSTEZ: las casillas pueden estar marcadas con X, ✓, palomita, círculo relleno o cualquier marca — todas cuentan como "marcada". Si un cuadrante está completamente vacío o ilegible, devolver todos los campos de esa manguera como "". Si un campo individual es ilegible, devolver "". NO inventar datos — si no se lee claro, dejar "".`;
 
@@ -948,7 +949,7 @@ async function runBatch(){
         }
         document.getElementById('progText').textContent=`Analizando ${i+1} de ${files.length}${attempt>1?' (intento '+attempt+')':''}...`;
         const model=attempt<3?'claude-haiku-4-5-20251001':'claude-sonnet-4-20250514';
-        const resp=await fetch(PROXY_URL+"/api/scan",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:files[i].mime,data:files[i].b64}},{type:"text",text:PROMPT}]}]})});
+        const resp=await fetch(PROXY_URL+"/api/scan",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:[files[i].isPdf?{type:"document",source:{type:"base64",media_type:"application/pdf",data:files[i].b64}}:{type:"image",source:{type:"base64",media_type:files[i].mime,data:files[i].b64}},{type:"text",text:PROMPT}]}]})});
         const data=await resp.json();
         const isOverloaded=data.error?.type==='overloaded_error'||data.error?.message?.includes('overloaded')||resp.status===529||resp.status===503;
         if(isOverloaded){
