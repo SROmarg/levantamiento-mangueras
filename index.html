@@ -540,7 +540,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
         <span>Registros en sesión:</span>
         <strong id="rc2">0</strong>
         <span class="sep"></span>
-        <button class="s-excel" id="bex2" onclick="exportExcel()" disabled>↓ Excel</button>
+        <button class="s-excel" id="bex2" onclick="shareExcel()" disabled>↓ Excel</button>
       </div>
 
       <!-- FORMULARIO MANUAL COLAPSABLE -->
@@ -606,7 +606,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
     <div class="th2">
       <div class="ttl">Registros <span class="cb" id="rc">0</span></div>
       <div class="tacts">
-        <button class="bxl" id="bex" onclick="exportExcel()" disabled>↓ Excel</button>
+        <button class="bxl" id="bex" onclick="shareExcel()" disabled>↓ Excel</button>
         <button class="bclr" onclick="clearAll()">Limpiar</button>
       </div>
     </div>
@@ -651,7 +651,7 @@ td.wc{white-space:normal;max-width:120px;font-size:9.5px;line-height:1.5;}
 <!-- BARRA FIJA MÓVIL (desktop fallback) -->
 <div id="mobileBar" style="display:none;">
   <div class="mb-cnt"><strong id="mbCount">0</strong> registros</div>
-  <button class="mb-xl" id="mbExcel" onclick="exportExcel()" disabled>⬇ Descargar Excel</button>
+  <button class="mb-xl" id="mbExcel" onclick="shareExcel()" disabled>⬇ Descargar Excel</button>
 </div>
 
 <script>
